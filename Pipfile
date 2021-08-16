@@ -1,0 +1,22 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+fastapi = "*"
+uvicorn = "*"
+selenium = "==4.0.0.b4"
+aiolinebot = "*"
+aiohttp = "*"
+bs4 = "*"
+lxml = "*"
+requests = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.8"
+
+[scripts]
+r = 'uvicorn main:app --debug'
