@@ -12,7 +12,6 @@ from models import PushContentModel
 from scrape_sites import scrape_atcoder, scrape_lancers, get_text_lancers, get_text_atcoder
 from settings import (
     DB_SCRAPE_RESULTS,
-    DEBUG,
     DRIVE_LINE_BOT_DRIVE,
     LINE_API,
     LINE_PARSER,
