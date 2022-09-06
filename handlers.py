@@ -1,6 +1,8 @@
 import os
+from secrets import token_urlsafe
 from typing import List
 
+from cryptocode import decrypt, encrypt
 from deta import _Base, _Drive
 from linebot import AsyncLineBotApi
 from linebot.models.events import Event, MessageEvent, FollowEvent
@@ -14,6 +16,7 @@ class EventsHandler:
         self.events = events
         self.db = db
         self.drive = drive
+        self.user_id = None
 
     async def handle_message_event(self, event: MessageEvent):
         if event.message.type == 'image':
@@ -40,13 +43,24 @@ class EventsHandler:
             )
 
     async def handle_follow_event(self, event: FollowEvent):
-        pass
+        self.db.put({
+            'token': token_urlsafe(20),
+        }, key=self.user_id)
+
+        await self.line_bot_api.reply_message(
+            event.reply_token,
+            [
+                TextSendMessage(text=f'Welcome!'),
+            ]
+        )
+        
 
     async def handler(self):
         # ベント処理List[Event]
         for event in self.events:
             try:
                 assert event.source.user_id == os.environ['MY_LINE_USER_ID'], 'user_idが異なります'
+                self.user_id = event.source.user_id
 
                 # メッセージイベント
                 if isinstance(event, MessageEvent):
@@ -64,3 +78,4 @@ class EventsHandler:
                     event.reply_token,
                     TextSendMessage(text="403 Forbidden\nYou have no authority.")
                 )
+                break
