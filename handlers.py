@@ -24,12 +24,13 @@ class EventsHandler:
             binary_data = b''
             async for b in data.iter_content():
                 binary_data += b
-            file_name = self.drive.put(
-                name=f'{self.user_id}/{event.message.id}.jpeg',
+            file_name = f'{event.message.id}.jpeg'
+            self.drive.put(
+                name=f'{self.user_id}/{file_name}',
                 data=binary_data,
                 content_type=data.content_type,
             )
-            user_token = self.db.get(self.user_id).key
+            user_token = self.db.get(self.user_id)['key']
             await self.line_bot_api.reply_message(
                 event.reply_token,
                 TextSendMessage(text=f'{BASE_PROJECT_URL}/images/{event.message.id}.jpeg?token={user_token}\nに保存しました')
