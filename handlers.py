@@ -14,11 +14,12 @@ async def handle_events(line_api: AsyncLineBotApi, events: List[Event], db: _Bas
     for event in events:
         try:
             assert event.source.user_id == os.environ['MY_LINE_USER_ID'], 'user_idが異なります'
-            if isinstance(event, ImageMessage):
-                await line_api.reply_message(
-                    event.reply_token,
-                    TextSendMessage(text='aaaaaaaaaaaa')
-                )
+
+            await line_api.reply_message(
+                event.reply_token,
+                TextSendMessage(text='aaaaaaaaaaaa')
+            )
+            isinstance(event, ImageMessage)
                 
             
             if event.message.type == 'image':
