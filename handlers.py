@@ -47,6 +47,13 @@ class EventsHandler:
                         text="\n\n".join(map(lambda x: f'{BASE_PROJECT_URL}/images{x.replace(self.user_id, "", 1)}?token={user_token}', image_file_paths))
                     )
                 )
+            else:
+                reply.append(
+                    TextSendMessage(
+                        text="クラウドに保存されている画像はありません。"
+                    )
+                )
+
             await self.line_bot_api.reply_message(
                 event.reply_token,
                 reply,
