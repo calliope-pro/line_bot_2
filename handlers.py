@@ -3,7 +3,7 @@ from typing import List
 
 from deta import _Base, _Drive
 from linebot import AsyncLineBotApi
-from linebot.models.events import Event
+from linebot.models.events import Event, MessageEvent, ImageMessage
 from linebot.models.send_messages import TextSendMessage
 
 from settings import BASE_PROJECT_URL
@@ -14,6 +14,12 @@ async def handle_events(line_api: AsyncLineBotApi, events: List[Event], db: _Bas
     for event in events:
         try:
             assert event.source.user_id == os.environ['MY_LINE_USER_ID'], 'user_idが異なります'
+            if isinstance(event, ImageMessage):
+                await line_api.reply_message(
+                    event.reply_token,
+                    TextSendMessage(text='aaaaaaaaaaaa')
+                )
+                
             
             if event.message.type == 'image':
                 data = await line_api.get_message_content(event.message.id)
@@ -51,7 +57,3 @@ async def handle_events(line_api: AsyncLineBotApi, events: List[Event], db: _Bas
                 event.reply_token,
                 TextSendMessage(text="403 Forbidden\nYou have no authority.")
             )
-
-        # except Exception as e:
-        #     print(e)
-        #     print('-' * 60)
