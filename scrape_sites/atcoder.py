@@ -3,7 +3,6 @@ from typing import Tuple
 import aiohttp
 from bs4 import BeautifulSoup
 from deta import _Base
-from linebot.models.send_messages import TextSendMessage
 
 
 async def request(url: str, session: aiohttp.ClientSession):

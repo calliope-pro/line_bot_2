@@ -1,9 +1,7 @@
 fastapi
-uvicorn
-selenium == 4.0.0.b4
 aiohttp
 bs4
 lxml
 requests
-deta
-line-bot-sdk
+deta[async]==1.1.0a2
+line-bot-sdk==2.3.0

@@ -1,27 +1,22 @@
 import os
 
 from deta import Deta
+from aiohttp import ClientSession
+from deta import App
 from fastapi import FastAPI
-from linebot import WebhookParser
+from linebot import AsyncLineBotApi, WebhookParser
+from linebot.aiohttp_async_http_client import AiohttpAsyncHttpClient
 
-from aiolinebot import AioLineBotApi
-
-DEBUG = False
 
 BASE_PROJECT_URL = 'https://calliope-bot.deta.dev'
 
 CHANNEL_SECRET = os.environ['CHANNEL_SECRET']
 CHANNEL_ACCESS_TOKEN = os.environ['CHANNEL_ACCESS_TOKEN']
 
-LINE_API = AioLineBotApi(CHANNEL_ACCESS_TOKEN)
+LINE_API = AsyncLineBotApi(CHANNEL_ACCESS_TOKEN, AiohttpAsyncHttpClient(ClientSession()))
 LINE_PARSER = WebhookParser(CHANNEL_SECRET)
 
-try:
-    from local_settings import DEBUG
-    app = FastAPI(debug=DEBUG)
-except ImportError:
-    from deta import App
-    app = App(FastAPI())
+app = App(FastAPI())
 
 deta = Deta(os.environ['DETA_PROJECT_KEY'])
 
