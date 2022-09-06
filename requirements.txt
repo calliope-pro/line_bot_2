@@ -1,8 +1,7 @@
 fastapi
-uvicorn
 aiohttp
 bs4
 lxml
 requests
-deta
+deta[async]==1.1.0a2
 line-bot-sdk
