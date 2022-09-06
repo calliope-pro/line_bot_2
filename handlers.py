@@ -30,7 +30,7 @@ class EventsHandler:
                 data=binary_data,
                 content_type=data.content_type,
             )
-            user_token = self.db.get(self.user_id)['key']
+            user_token = self.db.get(self.user_id)['token']
             await self.line_bot_api.reply_message(
                 event.reply_token,
                 TextSendMessage(text=f'{BASE_PROJECT_URL}/images/{event.message.id}.jpeg?token={user_token}\nに保存しました')
