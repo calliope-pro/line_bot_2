@@ -60,7 +60,7 @@ async def notify(request: Request, bg_tasks: BackgroundTasks):
             TextSendMessage(text=text_lancers)
         )
 
-    await LINE_BOT_API.push_message_async(
+    await LINE_BOT_API.push_message(
         os.environ['MY_LINE_USER_ID'],
         messages_list if messages_list else TextSendMessage(text='更新無し'),
     )
@@ -77,7 +77,7 @@ async def push_message(content: PushContentModel):
         content.type = '未設定'
     text = f'type:{content.type}\nbody:{content.body}'
 
-    await LINE_BOT_API.push_message_async(
+    await LINE_BOT_API.push_message(
         os.environ['MY_LINE_USER_ID'],
         TextSendMessage(text)
     )
