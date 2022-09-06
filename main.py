@@ -30,7 +30,7 @@ async def handle_line_request(request: Request, bg_tasks: BackgroundTasks):
     except InvalidSignatureError:
         return HTTPException(400, 'Invalid signature.')
 
-    bg_tasks.add_task(lambda *args, **kwargs: print(args, kwargs), line_bot_api=LINE_BOT_API, events=events, db=DB_SCRAPE_RESULTS, drive=DRIVE_LINE_BOT_DRIVE)
+    bg_tasks.add_task(lambda *args, **kwargs: EventsHandler(*args, **kwargs).handler(), line_bot_api=LINE_BOT_API, events=events, db=DB_SCRAPE_RESULTS, drive=DRIVE_LINE_BOT_DRIVE)
 
     return 'ok'
 
