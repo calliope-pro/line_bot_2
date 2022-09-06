@@ -9,10 +9,12 @@ from deta import _Base
 BASE_URL = 'https://www.lancers.jp/work/search?sort=started&type%5B%5D=competition&type%5B%5D=task&type%5B%5D=project&open=1&show_description=1&work_rank%5B%5D=3&work_rank%5B%5D=2&work_rank%5B%5D=0&budget_from=&budget_to=&keyword={}&not={}&page={}'
 DETAIL_BASE_URL = 'https://www.lancers.jp/work/detail/{}'
 
-# 検索したい語群と除外したい語群のリスト
+# 検索したい語群と除外したい語群のリスト((検索したい語群,), (除外したい語群))
 KEY_WORDS: List[Tuple[Tuple[str, ...], Tuple[str, ...]]] = [
-    (('python', 'django'), ('ruby', 'java')),
-    (('React', ), ('java', ))
+    (('Django'), ('ruby', 'java')),
+    (('React', ), ('java', 'php')),
+    (('FastAPI', ), tuple()),
+    (('Deta', ), ('Go', ))
 ]
 
 # headers(User-Agent)を指定しないと403になるため
@@ -29,8 +31,8 @@ async def get_work_detail(work_url: str, session: aiohttp.ClientSession):
         html = await response.text()
     soup = BeautifulSoup(html, 'lxml')
 
-    work_category = soup.select_one('.c-definitionList:nth-of-type(1) > dd')
-    work_purpose = soup.select_one('.c-definitionList:nth-of-type(2) > dd')
+    work_category = soup.select_one('.c-definitionList:nth-of-type(1) > dd') or ''
+    work_purpose = soup.select_one('.c-definitionList:nth-of-type(2) > dd') or ''
     return work_url, work_category.text.strip(), work_purpose.text.strip()
 
 
