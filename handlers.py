@@ -14,6 +14,7 @@ class EventsHandler:
         self.events = events
         self.db = db
         self.drive = drive
+        print(line_bot_api)
 
     # async def handle_message_event(self):
         
