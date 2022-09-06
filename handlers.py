@@ -45,9 +45,11 @@ class EventsHandler:
             )
 
     async def handle_follow_event(self, event: FollowEvent):
+        print('HHHH')
         self.db.put({
             'token': uuid4(),
         }, key=self.user_id)
+        print('HHHH')
 
         await self.line_bot_api.reply_message(
             event.reply_token,
