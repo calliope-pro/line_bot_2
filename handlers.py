@@ -31,7 +31,7 @@ class EventsHandler:
             )
             await self.line_bot_api.reply_message(
                 event.reply_token,
-                TextSendMessage(text=f'{BASE_PROJECT_URL}/images/{file_name}\nに保存しました')
+                TextSendMessage(text=f'{BASE_PROJECT_URL}/images/{self.user_id}/{file_name}\nに保存しました')
             )
         else:
             await self.line_bot_api.reply_message(
