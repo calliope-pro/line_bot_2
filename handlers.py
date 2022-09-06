@@ -26,7 +26,7 @@ class EventsHandler:
             async for b in data.iter_content():
                 binary_data += b
             file_name = self.drive.put(
-                name=f'{self.user_id}/{file_name}',
+                name=f'{self.user_id}/{event.message.id}.jpeg',
                 data=binary_data,
                 content_type=data.content_type,
             )
