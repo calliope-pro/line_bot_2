@@ -1,0 +1,33 @@
+name: Deploy to deta
+
+on: 
+  - push
+  - workflow_dispatch
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Ready for deploying...
+        run: echo Ready for deploying...
+
+      - name: Deploy to Deta
+        env:
+          DETA_ACCESS_TOKEN: ${{ secrets.DETA_ACCESS_TOKEN }}
+          DETA_MICRO_NAME: notify_line_bot
+          DETA_PROJECT_NAME: line-bot
+        # You may pin to the exact commit or the version.
+        # uses: BogDAAAMN/deta-deploy-action@72a273bfa551ca258ba3802cf8ea4ae74a5cd3f9
+        uses: BogDAAAMN/deta-deploy-action@v1.0.1
+        with:
+          # Deta access token
+          deta-access-token: ${{ env.DETA_ACCESS_TOKEN }}
+          # Deta micro name
+          deta-name: ${{ env.DETA_MICRO_NAME }}
+          # Deta project name
+          deta-project: ${{ env.DETA_PROJECT_NAME }}
+
+      - name: Deployed!
+        run: echo Deployed!
