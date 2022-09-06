@@ -70,7 +70,7 @@ async def notify(request: Request, bg_tasks: BackgroundTasks):
 @app.get('/images/{file_name}')
 async def show_image(file_name: str, token: str):
     line_account = DB_LINE_ACCOUNTS.fetch({'token': token}).items[0]
-    image = DRIVE_LINE_BOT_DRIVE.get(f'{line_account.key}/{file_name}')
+    image = DRIVE_LINE_BOT_DRIVE.get(f'{line_account["key"]}/{file_name}')
     return responses.StreamingResponse(image.iter_chunks(), media_type='image/png')
 
 @app.post('/push/')
