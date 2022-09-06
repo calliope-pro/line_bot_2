@@ -12,6 +12,7 @@ lxml = "*"
 requests = "*"
 deta = "*"
 line-bot-sdk = "*"
+cryptocode = "*"
 
 [dev-packages]
 
