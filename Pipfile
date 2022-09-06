@@ -6,12 +6,10 @@ name = "pypi"
 [packages]
 fastapi = "~=0.68"
 uvicorn = "*"
-selenium = "==4.0.0.b4"
 aiohttp = "*"
 bs4 = "*"
 lxml = "*"
 requests = "*"
-sqlalchemy = "*"
 deta = "*"
 line-bot-sdk = "*"
 

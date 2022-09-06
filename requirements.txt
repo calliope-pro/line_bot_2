@@ -1,6 +1,5 @@
 fastapi
 uvicorn
-selenium == 4.0.0.b4
 aiohttp
 bs4
 lxml
