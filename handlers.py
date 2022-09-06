@@ -21,7 +21,6 @@ class EventsHandler:
             binary_data = b''
             for b in data.iter_content():
                 binary_data += b
-            await data.response.close()
             print(data.content_type)
             file_name = self.drive.put(
                 name=f'{event.message.id}.jpeg',
