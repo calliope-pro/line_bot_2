@@ -16,6 +16,7 @@ class EventsHandler:
         self.drive = drive
 
     async def handle_message_event(self, event: MessageEvent):
+        print(event.message.type)
         if event.message.type == 'image':
             data = await self.line_bot_api.get_message_content(event.message.id)
             binary_data = b''
