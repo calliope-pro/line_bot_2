@@ -1,6 +1,6 @@
 import os
-from secrets import token_urlsafe
 from typing import List
+from uuid import uuid4
 
 from cryptocode import decrypt, encrypt
 from deta import _Base, _Drive
@@ -29,9 +29,10 @@ class EventsHandler:
                 data=binary_data,
                 content_type=data.content_type,
             )
+            user_token = self.db.get(self.user_id)
             await self.line_bot_api.reply_message(
                 event.reply_token,
-                TextSendMessage(text=f'{BASE_PROJECT_URL}/images/{self.user_id}/{file_name}\nに保存しました')
+                TextSendMessage(text=f'{BASE_PROJECT_URL}/images/{file_name}?token={user_token}\nに保存しました')
             )
         else:
             await self.line_bot_api.reply_message(
@@ -44,7 +45,7 @@ class EventsHandler:
 
     async def handle_follow_event(self, event: FollowEvent):
         self.db.put({
-            'token': token_urlsafe(20),
+            'token': uuid4(),
         }, key=self.user_id)
 
         await self.line_bot_api.reply_message(
