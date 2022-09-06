@@ -39,7 +39,7 @@ async def handle_events(line_api: AioLineBotApi, events: List[Event], db: _Base,
                         #     f'{BASE_PROJECT_URL}/images/14734080206120.png/',
                         #     f'https://media.istockphoto.com/vectors/thumbnail-image-vector-graphic-vector-id1147544807?k=20&m=1147544807&s=612x612&w=0&h=pBhz1dkwsCMq37Udtp9sfxbjaMl27JUapoyYpQm0anc=',
                         # ),
-                        TextSendMessage(text=f'You: {event.message.text}'),
+                        TextSendMessage(text=f'You sended: {event.message.text}'),
                         TextSendMessage(text="\n".join(map(lambda x: f'{BASE_PROJECT_URL}/images/{x}', drive.list()["names"]))),
                     ]
                 )
