@@ -2,21 +2,21 @@ import os
 from typing import List
 
 from deta import _Base, _Drive
+from linebot import AsyncLineBotApi
 from linebot.models.events import Event
-from linebot.models.send_messages import ImageSendMessage, TextSendMessage
+from linebot.models.send_messages import TextSendMessage
 
-from aiolinebot import AioLineBotApi
 from settings import BASE_PROJECT_URL
 
 
-async def handle_events(line_api: AioLineBotApi, events: List[Event], db: _Base, drive: _Drive):
+async def handle_events(line_api: AsyncLineBotApi, events: List[Event], db: _Base, drive: _Drive):
     # イベント処理List[Event]
     for event in events:
         try:
             assert event.source.user_id == os.environ['MY_LINE_USER_ID'], 'user_idが異なります'
             
             if event.message.type == 'image':
-                data = await line_api.get_message_content_async(event.message.id)
+                data = await line_api.get_message_content(event.message.id)
                 binary_data = b''
                 async for b in data.iter_content():
                     binary_data += b
@@ -26,13 +26,13 @@ async def handle_events(line_api: AioLineBotApi, events: List[Event], db: _Base,
                     data=binary_data,
                     content_type=data.content_type,
                 )
-                await line_api.reply_message_async(
+                await line_api.reply_message(
                     event.reply_token,
                     TextSendMessage(text=f'{BASE_PROJECT_URL}/images/{file_name}\nに保存しました')
                 )
 
             else:
-                await line_api.reply_message_async(
+                await line_api.reply_message(
                     event.reply_token,
                     [
                         # ImageSendMessage(
@@ -47,7 +47,7 @@ async def handle_events(line_api: AioLineBotApi, events: List[Event], db: _Base,
         except AssertionError as e:
             print(e)
             print(f'{event.source.user_id}から発信')
-            await line_api.reply_message_async(
+            await line_api.reply_message(
                 event.reply_token,
                 TextSendMessage(text="403 Forbidden\nYou have no authority.")
             )
