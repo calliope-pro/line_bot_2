@@ -19,7 +19,7 @@ class EventsHandler:
         if event.message.type == 'image':
             data = await self.line_bot_api.get_message_content(event.message.id)
             binary_data = b''
-            for b in data.iter_content():
+            async for b in data.iter_content():
                 binary_data += b
             print(data.content_type)
             file_name = self.drive.put(
