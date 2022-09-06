@@ -13,7 +13,7 @@ BASE_PROJECT_URL = 'https://calliope-bot.deta.dev'
 CHANNEL_SECRET = os.environ['CHANNEL_SECRET']
 CHANNEL_ACCESS_TOKEN = os.environ['CHANNEL_ACCESS_TOKEN']
 
-LINE_API = AsyncLineBotApi(CHANNEL_ACCESS_TOKEN, AiohttpAsyncHttpClient(ClientSession()))
+LINE_BOT_API = AsyncLineBotApi(CHANNEL_ACCESS_TOKEN, AiohttpAsyncHttpClient(ClientSession()))
 LINE_PARSER = WebhookParser(CHANNEL_SECRET)
 
 app = App(FastAPI())
