@@ -19,6 +19,7 @@ class EventsHandler:
         self.user_id = None
 
     async def handle_message_event(self, event: MessageEvent):
+        user_token = self.db.get(self.user_id)['token']
         if event.message.type == 'image':
             data = await self.line_bot_api.get_message_content(event.message.id)
             binary_data = b''
@@ -30,7 +31,6 @@ class EventsHandler:
                 data=binary_data,
                 content_type=data.content_type,
             )
-            user_token = self.db.get(self.user_id)['token']
             await self.line_bot_api.reply_message(
                 event.reply_token,
                 TextSendMessage(text=f'{BASE_PROJECT_URL}/images/{event.message.id}.jpeg?token={user_token}\nに保存しました')
@@ -40,7 +40,7 @@ class EventsHandler:
                 event.reply_token,
                 [
                     TextSendMessage(text=f'You: {event.message.text}'),
-                    TextSendMessage(text="\n".join(map(lambda x: f'{BASE_PROJECT_URL}/images/{x}', self.drive.list()["names"]))),
+                    TextSendMessage(text="\n\n".join(map(lambda x: f'{BASE_PROJECT_URL}/images/{x}?token={user_token}', self.drive.list(prefix=self.user_id)["names"]))),
                 ]
             )
 
