@@ -83,7 +83,6 @@ async def push_message(content: PushContentModel):
     return 'ok'
 
 
-if not DEBUG:
-    from crons import *
+from crons import *
 
 
