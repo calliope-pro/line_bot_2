@@ -11,6 +11,7 @@ from handlers import EventsHandler
 from models import PushContentModel
 from scrape_sites import scrape_atcoder, scrape_lancers, get_text_lancers, get_text_atcoder
 from settings import (
+    DB_LINE_ACCOUNTS,
     DB_SCRAPE_RESULTS,
     DRIVE_LINE_BOT_DRIVE,
     LINE_BOT_API,
@@ -30,7 +31,7 @@ async def handle_line_request(request: Request, bg_tasks: BackgroundTasks):
     except InvalidSignatureError:
         return HTTPException(400, 'Invalid signature.')
 
-    event_handler = EventsHandler(LINE_BOT_API, events, DB_SCRAPE_RESULTS, DRIVE_LINE_BOT_DRIVE)
+    event_handler = EventsHandler(LINE_BOT_API, events, DB_LINE_ACCOUNTS, DRIVE_LINE_BOT_DRIVE)
     bg_tasks.add_task(event_handler.handler)
 
     return 'ok'
