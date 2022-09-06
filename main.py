@@ -7,13 +7,13 @@ from linebot.exceptions import InvalidSignatureError
 from linebot.models.events import Event
 from linebot.models.send_messages import TextSendMessage
 
-import handlers
+from handlers import EventsHandler
 from models import PushContentModel
 from scrape_sites import scrape_atcoder, scrape_lancers, get_text_lancers, get_text_atcoder
 from settings import (
     DB_SCRAPE_RESULTS,
     DRIVE_LINE_BOT_DRIVE,
-    LINE_API,
+    LINE_BOT_API,
     LINE_PARSER,
     app,
 )
@@ -30,7 +30,8 @@ async def handle_line_request(request: Request, bg_tasks: BackgroundTasks):
     except InvalidSignatureError:
         return HTTPException(400, 'Invalid signature.')
 
-    bg_tasks.add_task(handlers.handle_events, line_api=LINE_API, events=events, db=DB_SCRAPE_RESULTS, drive=DRIVE_LINE_BOT_DRIVE)
+    event_handler = EventsHandler(LINE_BOT_API, events, DB_SCRAPE_RESULTS, DRIVE_LINE_BOT_DRIVE)
+    bg_tasks.add_task(event_handler.handler)
 
     return 'ok'
 
@@ -59,7 +60,7 @@ async def notify(request: Request, bg_tasks: BackgroundTasks):
             TextSendMessage(text=text_lancers)
         )
 
-    await LINE_API.push_message_async(
+    await LINE_BOT_API.push_message_async(
         os.environ['MY_LINE_USER_ID'],
         messages_list if messages_list else TextSendMessage(text='更新無し'),
     )
@@ -76,7 +77,7 @@ async def push_message(content: PushContentModel):
         content.type = '未設定'
     text = f'type:{content.type}\nbody:{content.body}'
 
-    await LINE_API.push_message_async(
+    await LINE_BOT_API.push_message_async(
         os.environ['MY_LINE_USER_ID'],
         TextSendMessage(text)
     )
