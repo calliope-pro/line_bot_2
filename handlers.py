@@ -25,31 +25,28 @@ class EventsHandler:
             binary_data = b''
             async for b in data.iter_content():
                 binary_data += b
-            file_name = f'{event.message.id}.jpeg'
-            self.drive.put(
+            file_name = self.drive.put(
                 name=f'{self.user_id}/{file_name}',
                 data=binary_data,
                 content_type=data.content_type,
             )
             await self.line_bot_api.reply_message(
                 event.reply_token,
-                TextSendMessage(text=f'{BASE_PROJECT_URL}/images/{event.message.id}.jpeg?token={user_token}\nに保存しました')
+                TextSendMessage(text=f'{BASE_PROJECT_URL}/images/{file_name.replace(self.user_id), "", 1}.jpeg?token={user_token}\nに保存しました')
             )
         else:
             await self.line_bot_api.reply_message(
                 event.reply_token,
                 [
                     TextSendMessage(text=f'You: {event.message.text}'),
-                    TextSendMessage(text="\n\n".join(map(lambda x: f'{BASE_PROJECT_URL}/images/{x}?token={user_token}', self.drive.list(prefix=self.user_id)["names"]))),
+                    TextSendMessage(text="\n\n".join(map(lambda x: f'{BASE_PROJECT_URL}/images/{x.replace(self.user_id), "", 1}?token={user_token}', self.drive.list(prefix=self.user_id)["names"]))),
                 ]
             )
 
     async def handle_follow_event(self, event: FollowEvent):
-        print('HHHH')
         self.db.put({
             'token': str(uuid4()),
         }, key=self.user_id)
-        print('HHHH')
 
         await self.line_bot_api.reply_message(
             event.reply_token,
@@ -57,7 +54,6 @@ class EventsHandler:
                 TextSendMessage(text=f'Welcome!'),
             ]
         )
-        
 
     async def handler(self):
         # ベント処理List[Event]
