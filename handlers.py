@@ -17,9 +17,9 @@ async def handle_events(line_api: AsyncLineBotApi, events: List[Event], db: _Bas
 
             await line_api.reply_message(
                 event.reply_token,
-                TextSendMessage(text='aaaaaaaaaaaa')
+                TextSendMessage(text='aaaaaaaaaaaa' if isinstance(event, ImageMessage) else 'bbbbbbb')
             )
-            isinstance(event, ImageMessage)
+            
                 
             
             if event.message.type == 'image':
