@@ -4,4 +4,5 @@ import requests
 @app.lib.cron()
 def get_notify(event):
     response = requests.get(f'{BASE_PROJECT_URL}/notify/')
-    return print(response.status_code)
+    print(response.status_code)
+    return
