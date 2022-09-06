@@ -2,13 +2,13 @@ import asyncio
 import os
 from typing import List
 
-from fastapi import BackgroundTasks, Request, WebSocket, responses
+from fastapi import BackgroundTasks, Request, responses, HTTPException
+from linebot.exceptions import InvalidSignatureError
 from linebot.models.events import Event
 from linebot.models.send_messages import TextSendMessage
 
 import handlers
 from models import PushContentModel
-# __init__.pyの12, 18行目のpathに関して__path__[0] -> /tmpに変更した
 from scrape_sites import scrape_atcoder, scrape_lancers, get_text_lancers, get_text_atcoder
 from settings import (
     DB_SCRAPE_RESULTS,
@@ -22,11 +22,14 @@ from settings import (
 
 @app.post('/callback/')
 async def handle_line_request(request: Request, bg_tasks: BackgroundTasks):
-    # 署名検証・イベント取得
-    events: List[Event] = LINE_PARSER.parse(
-        (await request.body()).decode('utf-8'),
-        request.headers['X-Line-Signature']
-    )
+    try:
+        # 署名検証・イベント取得
+        events: List[Event] = LINE_PARSER.parse(
+            (await request.body()).decode('utf-8'),
+            request.headers['X-Line-Signature']
+        )
+    except InvalidSignatureError:
+        return HTTPException(400, 'Invalid signature.')
 
     bg_tasks.add_task(handlers.handle_events, line_api=LINE_API, events=events, db=DB_SCRAPE_RESULTS, drive=DRIVE_LINE_BOT_DRIVE)
 
