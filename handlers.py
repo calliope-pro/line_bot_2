@@ -32,15 +32,24 @@ class EventsHandler:
             )
             await self.line_bot_api.reply_message(
                 event.reply_token,
-                TextSendMessage(text=f'{BASE_PROJECT_URL}/images{file_name.replace(self.user_id, "", 1)}?token={user_token}\nに保存しました')
+                TextSendMessage(
+                    text=f'{BASE_PROJECT_URL}/images{file_name.replace(self.user_id, "", 1)}?token={user_token}\nに保存しました'
+                )
             )
         else:
+            reply = [
+                TextSendMessage(text=f'You: {event.message.text}'),
+            ]
+            image_file_paths = self.drive.list(prefix=self.user_id)["names"]
+            if image_file_paths:
+                reply.append(
+                    TextSendMessage(
+                        text="\n\n".join(map(lambda x: f'{BASE_PROJECT_URL}/images{x.replace(self.user_id, "", 1)}?token={user_token}', image_file_paths))
+                    )
+                )
             await self.line_bot_api.reply_message(
                 event.reply_token,
-                [
-                    TextSendMessage(text=f'You: {event.message.text}'),
-                    TextSendMessage(text="\n\n".join(map(lambda x: f'{BASE_PROJECT_URL}/images{x.replace(self.user_id, "", 1)}?token={user_token}', self.drive.list(prefix=self.user_id)["names"]))),
-                ]
+                reply,
             )
 
     async def handle_follow_event(self, event: FollowEvent):
