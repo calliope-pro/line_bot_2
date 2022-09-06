@@ -22,11 +22,11 @@ class EventsHandler:
             print(data)
             print(data.content_type)
             binary_data = b''
-            async for b in data.iter_content():
+            for b in data.iter_content():
                 binary_data += b
             await data.response.close()
             file_name = self.drive.put(
-                name=f'{event.message.id}.png',
+                name=f'{event.message.id}.jpeg',
                 data=binary_data,
                 content_type=data.content_type,
             )
