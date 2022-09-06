@@ -19,6 +19,8 @@ class EventsHandler:
         print(event.message.type)
         if event.message.type == 'image':
             data = await self.line_bot_api.get_message_content(event.message.id)
+            print(data)
+            print(data.content_type)
             binary_data = b''
             async for b in data.iter_content():
                 binary_data += b
