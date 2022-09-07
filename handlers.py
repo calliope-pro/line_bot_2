@@ -80,6 +80,7 @@ class EventsHandler:
             await self.line_bot_api.reply_message(
                 event.reply_token,
                 TextSendMessage(
+                    text='メモ機能の何を使いますか？',
                     quick_reply=QuickReply(
                         items=[
                             QuickReplyButton(action=PostbackAction(label='memo list', data='memo_list')),
