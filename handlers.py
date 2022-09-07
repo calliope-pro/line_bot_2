@@ -1,12 +1,14 @@
 import os
+import re
 from typing import List
 from uuid import uuid4
 
 from cryptocode import decrypt, encrypt
 from deta import _Base, _Drive
 from linebot import AsyncLineBotApi
-from linebot.models.events import Event, MessageEvent, FollowEvent
-from linebot.models.send_messages import TextSendMessage
+from linebot.models.actions import PostbackAction
+from linebot.models.events import Event, MessageEvent, FollowEvent, PostbackEvent
+from linebot.models.send_messages import TextSendMessage, QuickReply, QuickReplyButton
 
 from settings import BASE_PROJECT_URL
 
@@ -70,6 +72,23 @@ class EventsHandler:
                 TextSendMessage(text=f'Welcome!'),
             ]
         )
+    
+    async def handle_postback_event(self, event: PostbackEvent):
+        mode = event.postback.data
+        print(mode)
+        if mode == 'memo':
+            await self.line_bot_api.reply_message(
+                event.reply_token,
+                TextSendMessage(
+                    quick_reply=QuickReply(
+                        items=[
+                            QuickReplyButton(action=PostbackAction(label='memo list', data='memo_list')),
+                            QuickReplyButton(action=PostbackAction(label='post memo', data='memo_post')),
+                            QuickReplyButton(action=PostbackAction(label='delete memo', data='memo_deletion')),
+                        ]
+                    )
+                )
+            )
 
     async def handler(self):
         # ベント処理List[Event]
@@ -81,6 +100,10 @@ class EventsHandler:
                 # メッセージイベント
                 if isinstance(event, MessageEvent):
                     await self.handle_message_event(event)
+                    break
+                # ポストバックイベント
+                elif isinstance(event, PostbackEvent):
+                    await self.handle_postback_event(event)
                     break
                 # 友達追加イベント
                 elif isinstance(event, FollowEvent):
