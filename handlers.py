@@ -83,9 +83,24 @@ class EventsHandler:
                     text='メモ機能の何を使いますか？',
                     quick_reply=QuickReply(
                         items=[
-                            QuickReplyButton(action=PostbackAction(label='memo list', data='memo_list')),
-                            QuickReplyButton(action=PostbackAction(label='post memo', data='memo_post')),
-                            QuickReplyButton(action=PostbackAction(label='delete memo', data='memo_deletion')),
+                            QuickReplyButton(
+                                action=PostbackAction(
+                                    label='メモ一覧',
+                                    data='memo_list',
+                                )
+                            ),
+                            QuickReplyButton(
+                                action=PostbackAction(
+                                    label='メモ追加',
+                                    data='memo_post',
+                                )
+                            ),
+                            QuickReplyButton(
+                                action=PostbackAction(
+                                    label='メモ削除',
+                                    data='memo_deletion',
+                                )
+                            ),
                         ]
                     )
                 )
