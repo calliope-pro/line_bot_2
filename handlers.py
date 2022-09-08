@@ -108,7 +108,6 @@ class EventsHandler:
             )
             try:
                 target_number = int(event.message.text)
-                print(target_number)
                 if target_number <= 0:
                     raise ValueError('Invalid number. Valid if target_number is greater or equal to 0.')
                 target_memo = user.memos.pop(target_number - 1)
@@ -130,7 +129,7 @@ class EventsHandler:
                         quick_reply=quick_reply,
                     ),
                 )
-            except (ValueError, IndexError):
+            except (ValueError, IndexError, TypeError):
                 await self.line_bot_api.reply_message(
                     event.reply_token,
                     TextSendMessage(
