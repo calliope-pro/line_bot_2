@@ -331,16 +331,6 @@ class EventsHandler:
                 )
             )
         elif data == PostbackActionData.reminder.value:
-            try:
-                assert self.user_id == os.environ['MY_LINE_USER_ID'], 'user_idが異なります'
-            except AssertionError as e:
-                print(e)
-                print(f'{event.source.user_id}から発信')
-                await self.line_bot_api.reply_message(
-                    event.reply_token,
-                    TextSendMessage(text="403 Forbidden\nYou have no authority.")
-                )
-
             now = datetime.now(JST).replace(tzinfo=None)
             quick_reply = QuickReply(
                 items=[
