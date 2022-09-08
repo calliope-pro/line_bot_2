@@ -107,13 +107,17 @@ class EventsHandler:
                     ).dict(),
                     key=user.key,
                 )
-                await self.line_bot_api.reply_message(
-                    event.reply_token,
-                    TextSendMessage(
-                        text=f'「{target_number}: {target_memo}」を削除しました。\n終了したい場合は以下のボタンを押してください。',
-                        quick_reply=quick_reply,
-                    ),
-                )
+                if user.memos:
+                    memo_list_text = '\n'.join(f'{number}: {value}' for number, value in enumerate(user.memos, 1))
+                else:
+                    memo_list_text = 'クラウドに保存されているメモはありません。'
+                    await self.line_bot_api.reply_message(
+                        event.reply_token,
+                        TextSendMessage(
+                            text=f'「{target_number}: {target_memo}」を削除しました。\n{memo_list_text}\n終了したい場合は以下のボタンを押してください。',
+                            quick_reply=quick_reply,
+                        ),
+                    )
             except (ValueError, IndexError):
                 await self.line_bot_api.reply_message(
                     event.reply_token,
