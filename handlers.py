@@ -75,7 +75,7 @@ class EventsHandler:
             if event.message.text:
                 self.db.update(
                     UserModel.construct(
-                        memos=user.memos + [event.message.text]
+                        memos=user.memos + [event.message.text.strip()]
                     ).dict(),
                     key=user.key,
                 )
