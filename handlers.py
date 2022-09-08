@@ -40,6 +40,7 @@ class EventsHandler:
                     )
                 )
             else:
+                print(os.environ.get('DETA_RUNTIME', 'false'))
                 reply = [
                     TextSendMessage(text=f'You: {event.message.text}'),
                 ]
@@ -67,7 +68,7 @@ class EventsHandler:
                     QuickReplyButton(
                         action=PostbackAction(
                             label='メモ追加を終了する',
-                            data='terminate',
+                            data=PostbackActionData.terminate.value,
                         )
                     ),
                 ]
@@ -101,7 +102,7 @@ class EventsHandler:
                     QuickReplyButton(
                         action=PostbackAction(
                             label='メモ削除を終了する',
-                            data='terminate',
+                            data=PostbackActionData.terminate.value,
                         )
                     ),
                 ]
@@ -155,25 +156,25 @@ class EventsHandler:
     
     async def handle_postback_event(self, event: PostbackEvent):
         data = event.postback.data
-        if data == 'memo':
+        if data == PostbackActionData.memo.value:
             quick_reply = QuickReply(
                 items=[
                     QuickReplyButton(
                         action=PostbackAction(
                             label='メモ一覧',
-                            data='memo_list',
+                            data=PostbackActionData.memo_list.value,
                         )
                     ),
                     QuickReplyButton(
                         action=PostbackAction(
                             label='メモ追加',
-                            data='memo_post',
+                            data=PostbackActionData.memo_post.value,
                         )
                     ),
                     QuickReplyButton(
                         action=PostbackAction(
                             label='メモ削除',
-                            data='memo_deletion',
+                            data=PostbackActionData.memo_deletion.value,
                         )
                     ),
                 ]
@@ -185,7 +186,7 @@ class EventsHandler:
                     quick_reply=quick_reply,
                 )
             )
-        elif data == 'memo_list':
+        elif data == PostbackActionData.memo_list.value:
             user = UserWithKeyModel.parse_obj(self.db.get(self.user_id))
             if user.memos:
                 memo_list_text = '現在クラウドに保存されているメモは↓\n'
@@ -209,7 +210,7 @@ class EventsHandler:
                     QuickReplyButton(
                         action=PostbackAction(
                             label='メモ追加を終了する',
-                            data='terminate',
+                            data=PostbackActionData.terminate.value,
                         )
                     ),
                 ]
@@ -232,7 +233,7 @@ class EventsHandler:
                     QuickReplyButton(
                         action=PostbackAction(
                             label='メモ削除を終了する',
-                            data='terminate',
+                            data=PostbackActionData.terminate.value,
                         )
                     ),
                 ]
@@ -244,7 +245,7 @@ class EventsHandler:
                     quick_reply=quick_reply,
                 )
             )
-        elif data == 'reminder':
+        elif data == PostbackActionData.reminder.value:
             try:
                 assert self.user_id == os.environ['MY_LINE_USER_ID'], 'user_idが異なります'
             except AssertionError as e:
@@ -255,13 +256,36 @@ class EventsHandler:
                     TextSendMessage(text="403 Forbidden\nYou have no authority.")
                 )
 
+            quick_reply = QuickReply(
+                items=[
+                    QuickReplyButton(
+                        action=PostbackAction(
+                            label='リマインダー一覧',
+                            data=PostbackActionData.reminder_list.value,
+                        )
+                    ),
+                    QuickReplyButton(
+                        action=PostbackAction(
+                            label='リマインダー追加',
+                            data=PostbackActionData.reminder_post.value,
+                        )
+                    ),
+                    QuickReplyButton(
+                        action=PostbackAction(
+                            label='リマインダー削除',
+                            data=PostbackActionData.reminder_deletion.value,
+                        )
+                    ),
+                ]
+            )
             await self.line_bot_api.reply_message(
                 event.reply_token,
                 TextSendMessage(
-                    text='どういう用件ですか？',
+                    text='リマインダー機能の何を使いますか？',
+                    quick_reply=quick_reply,
                 )
             )
-        elif data == 'usage':
+        elif data == PostbackActionData.usage.value:
             await self.line_bot_api.reply_message(
                 event.reply_token,
                 TextSendMessage(
@@ -271,7 +295,7 @@ class EventsHandler:
 ③時間を設定しリマインダーを登録することができます。(作成中)'''
                 )
             )
-        elif data == 'terminate':
+        elif data == PostbackActionData.terminate.value:
             self.db.update(
                 UserModel.construct(
                     mode=PostbackActionData.normal.value).dict(),

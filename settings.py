@@ -7,7 +7,6 @@ from fastapi import FastAPI
 from linebot import AsyncLineBotApi, WebhookParser
 from linebot.aiohttp_async_http_client import AiohttpAsyncHttpClient
 
-print(os.environ.get('DETA_RUNTIME', 'false'))
 # if os.environ.get('DETA_RUNTIME', 'false') == 'true':
 from deta import App
 app = App(FastAPI())
