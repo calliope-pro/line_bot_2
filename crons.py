@@ -7,7 +7,7 @@ from linebot.models.send_messages import TextSendMessage
 from pydantic import parse_obj_as
 
 from models import ReminderWithKeyModel
-from settings import DB_REMINDERS, JST, LINE_BOT_API, app, BASE_PROJECT_URL, DB
+from settings import DB_REMINDERS, JST, LINE_BOT_API, app, BASE_PROJECT_URL
 
 @app.lib.cron()
 def get_notify(event):
