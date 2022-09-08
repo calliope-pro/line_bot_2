@@ -193,6 +193,11 @@ class EventsHandler:
                 )
             )
         elif data == Mode.memo_deletion.value:
+            self.db.update(
+                UserModel.construct(
+                    mode=Mode.memo_deletion.value).dict(),
+                key=self.user_id
+            )
             await self.line_bot_api.reply_message(
                 event.reply_token,
                 TextSendMessage(
