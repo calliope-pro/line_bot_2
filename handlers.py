@@ -40,7 +40,7 @@ class EventsHandler:
                     )
                 )
             else:
-                print(os.environ.get('DETA_RUNTIME', 'false'))
+                print(os.getenv('DETA_RUNTIME'))
                 reply = [
                     TextSendMessage(text=f'You: {event.message.text}'),
                 ]
