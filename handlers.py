@@ -117,13 +117,14 @@ class EventsHandler:
                     key=user.key,
                 )
                 if user.memos:
-                    memo_list_text = '\n'.join(f'{number}: {value}' for number, value in enumerate(user.memos, 1))
+                    memo_list_text = '現在クラウドに保存されているメモは↓\n'
+                    memo_list_text += '\n'.join(f'{number}: {value}' for number, value in enumerate(user.memos, 1))
                 else:
                     memo_list_text = 'クラウドに保存されているメモはありません。'
                 await self.line_bot_api.reply_message(
                     event.reply_token,
                     TextSendMessage(
-                        text=f'「{target_number}: {target_memo}」を削除しました。\n{memo_list_text}\n終了したい場合は以下のボタンを押してください。',
+                        text=f'「{target_number}: {target_memo}」を削除しました。\n\n{memo_list_text}\n\n終了したい場合は以下のボタンを押してください。',
                         quick_reply=quick_reply,
                     ),
                 )
@@ -186,13 +187,14 @@ class EventsHandler:
         elif data == 'memo_list':
             user = UserWithKeyModel.parse_obj(self.db.get(self.user_id))
             if user.memos:
-                text = '\n'.join(f'{number}: {value}' for number, value in enumerate(user.memos, 1))
+                memo_list_text = '現在クラウドに保存されているメモは↓\n'
+                memo_list_text += '\n'.join(f'{number}: {value}' for number, value in enumerate(user.memos, 1))
             else:
-                text = 'クラウドに保存されているメモはありません。'
+                memo_list_text = 'クラウドに保存されているメモはありません。'
             await self.line_bot_api.reply_message(
                 event.reply_token,
                 TextSendMessage(
-                    text=text,
+                    text=memo_list_text,
                 )
             )
         elif data == Mode.memo_post.value:
