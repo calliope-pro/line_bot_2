@@ -10,7 +10,7 @@ from linebot.models.events import Event, MessageEvent, FollowEvent, PostbackEven
 from linebot.models.send_messages import TextSendMessage, QuickReply, QuickReplyButton
 from models import UserModel, UserWithKeyModel
 
-from settings import BASE_PROJECT_URL, IS_MAINTENANCE, Mode
+from settings import BASE_PROJECT_URL, IS_MAINTENANCE, PostbackActionData
 
 class EventsHandler:
     def __init__(self, line_bot_api: AsyncLineBotApi, events: List[Event], db: _Base, drive: _Drive):
@@ -22,16 +22,16 @@ class EventsHandler:
 
     async def handle_message_event(self, event: MessageEvent):
         user = UserWithKeyModel.parse_obj(self.db.get(self.user_id))
-        if user.mode == Mode.normal.value:
+        if user.mode == PostbackActionData.normal.value:
             if event.message.type == 'image':
-                data = await self.line_bot_api.get_message_content(event.message.id)
+                stream_data = await self.line_bot_api.get_message_content(event.message.id)
                 binary_data = b''
-                async for b in data.iter_content():
+                async for b in stream_data.iter_content():
                     binary_data += b
                 file_name = self.drive.put(
                     name=f'{self.user_id}/{event.message.id}.jpeg',
                     data=binary_data,
-                    content_type=data.content_type,
+                    content_type=stream_data.content_type,
                 )
                 await self.line_bot_api.reply_message(
                     event.reply_token,
@@ -61,7 +61,7 @@ class EventsHandler:
                     event.reply_token,
                     reply,
                 )
-        elif user.mode == Mode.memo_post.value:
+        elif user.mode == PostbackActionData.memo_post.value:
             quick_reply = QuickReply(
                 items=[
                     QuickReplyButton(
@@ -95,7 +95,7 @@ class EventsHandler:
                         quick_reply=quick_reply,
                     ),
                 )
-        elif user.mode == Mode.memo_deletion.value:
+        elif user.mode == PostbackActionData.memo_deletion.value:
             quick_reply = QuickReply(
                 items=[
                     QuickReplyButton(
@@ -142,7 +142,7 @@ class EventsHandler:
         self.db.put(
             UserModel(
                 token=str(uuid4()),
-                mode=Mode.normal.value,
+                mode=PostbackActionData.normal.value,
                 memos=[]
             ).dict(),
             key=self.user_id
@@ -198,10 +198,10 @@ class EventsHandler:
                     text=memo_list_text,
                 )
             )
-        elif data == Mode.memo_post.value:
+        elif data == PostbackActionData.memo_post.value:
             self.db.update(
                 UserModel.construct(
-                    mode=Mode.memo_post.value).dict(),
+                    mode=PostbackActionData.memo_post.value).dict(),
                 key=self.user_id
             )
             quick_reply = QuickReply(
@@ -221,10 +221,10 @@ class EventsHandler:
                     quick_reply=quick_reply,
                 )
             )
-        elif data == Mode.memo_deletion.value:
+        elif data == PostbackActionData.memo_deletion.value:
             self.db.update(
                 UserModel.construct(
-                    mode=Mode.memo_deletion.value).dict(),
+                    mode=PostbackActionData.memo_deletion.value).dict(),
                 key=self.user_id
             )
             quick_reply = QuickReply(
@@ -274,7 +274,7 @@ class EventsHandler:
         elif data == 'terminate':
             self.db.update(
                 UserModel.construct(
-                    mode=Mode.normal.value).dict(),
+                    mode=PostbackActionData.normal.value).dict(),
                 key=self.user_id
             )
             await self.line_bot_api.reply_message(
