@@ -5,13 +5,13 @@ name = "pypi"
 
 [packages]
 fastapi = "~=0.68"
-uvicorn = "*"
 aiohttp = "*"
 bs4 = "*"
 lxml = "*"
 requests = "*"
 deta = "*"
 line-bot-sdk = "*"
+cryptocode = "*"
 
 [dev-packages]
 
@@ -19,5 +19,4 @@ line-bot-sdk = "*"
 python_version = "3.8"
 
 [scripts]
-r = 'uvicorn main:app --debug'
-ngrok = 'C:\Users\calli\Downloads\ngrok-stable-windows-amd64\ngrok.exe http 8000'
+richmenu = 'python rich_menu/create_rich_menu.py'

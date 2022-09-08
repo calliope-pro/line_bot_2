@@ -11,6 +11,7 @@ from handlers import EventsHandler
 from models import PushContentModel
 from scrape_sites import scrape_atcoder, scrape_lancers, get_text_lancers, get_text_atcoder
 from settings import (
+    DB_LINE_ACCOUNTS,
     DB_SCRAPE_RESULTS,
     DRIVE_LINE_BOT_DRIVE,
     LINE_BOT_API,
@@ -30,7 +31,7 @@ async def handle_line_request(request: Request, bg_tasks: BackgroundTasks):
     except InvalidSignatureError:
         return HTTPException(400, 'Invalid signature.')
 
-    event_handler = EventsHandler(LINE_BOT_API, events, DB_SCRAPE_RESULTS, DRIVE_LINE_BOT_DRIVE)
+    event_handler = EventsHandler(LINE_BOT_API, events, DB_LINE_ACCOUNTS, DRIVE_LINE_BOT_DRIVE)
     bg_tasks.add_task(event_handler.handler)
 
     return 'ok'
@@ -66,9 +67,10 @@ async def notify(request: Request, bg_tasks: BackgroundTasks):
     )
     return 'ok'
 
-@app.get('/images/{file_name}/')
-async def show_image(file_name: str):
-    image = DRIVE_LINE_BOT_DRIVE.get(file_name)
+@app.get('/images/{file_name}')
+async def show_image(file_name: str, token: str):
+    line_account = DB_LINE_ACCOUNTS.fetch({'token': token}).items[0]
+    image = DRIVE_LINE_BOT_DRIVE.get(f'{line_account["key"]}/{file_name}')
     return responses.StreamingResponse(image.iter_chunks(), media_type='image/png')
 
 @app.post('/push/')
