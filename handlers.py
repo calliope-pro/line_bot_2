@@ -113,9 +113,7 @@ class EventsHandler:
                     raise ValueError('Invalid number. Valid if target_number is greater or equal to 0.')
                 target_memo = user.memos.pop(target_number - 1)
                 DB_LINE_ACCOUNTS.update(
-                    UserModel.construct(
-                        memos=user.memos
-                    ).dict(),
+                    user.dict(include={'memos'}),
                     key=user.key,
                 )
                 if user.memos:
@@ -161,8 +159,9 @@ class EventsHandler:
                         ),
                     )
                 else:
+                    user_reminder.content = target_text
                     DB_REMINDERS.update(
-                        ReminderModel.construct(content=target_text).dict(),
+                        user_reminder.dict(include={'content'}),
                         key=user_reminder.key,
                     )
                     await self.line_bot_api.reply_message(
@@ -244,7 +243,8 @@ class EventsHandler:
         elif data == PostbackActionData.memo_post.value:
             DB_LINE_ACCOUNTS.update(
                 UserModel.construct(
-                    mode=PostbackActionData.memo_post.value).dict(),
+                    mode=PostbackActionData.memo_post.value
+                ).dict(),
                 key=self.user_id
             )
             quick_reply = QuickReply(
@@ -267,7 +267,8 @@ class EventsHandler:
         elif data == PostbackActionData.memo_deletion.value:
             DB_LINE_ACCOUNTS.update(
                 UserModel.construct(
-                    mode=PostbackActionData.memo_deletion.value).dict(),
+                    mode=PostbackActionData.memo_deletion.value
+                ).dict(),
                 key=self.user_id
             )
             quick_reply = QuickReply(
