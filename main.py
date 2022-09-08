@@ -81,7 +81,7 @@ async def notify_reminders():
                 TextSendMessage(reminder.content)
             )
         )
-        for reminder in reminders
+            for reminder in reminders
     ]
     await asyncio.gather(*coroutines)
     return 'OK'

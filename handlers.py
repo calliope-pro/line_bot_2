@@ -377,7 +377,10 @@ class EventsHandler:
             user_reminders = parse_obj_as(List[ReminderWithKeyModel], user_reminders_raw)
             if user_reminders:
                 reminder_list_text = '現在クラウドに保存されているリマインダーは↓\n'
-                reminder_list_text += '\n'.join(f'{number}:\n{reminder.datetime} {reminder.content}' for number, reminder in enumerate(user_reminders, 1))
+                reminder_list_text += '\n'.join(
+                    f'{number}:\n{datetime.fromisoformat(reminder.datetime).astimezone(JST).strftime("%Y/%m/%d %H:%M")} {reminder.content}'
+                        for number, reminder in enumerate(user_reminders, 1)
+                )
             else:
                 reminder_list_text = 'クラウドに保存されているリマインダーはありません。'
             await self.line_bot_api.reply_message(
