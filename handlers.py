@@ -122,9 +122,9 @@ class EventsHandler:
                 )
             )
         elif data == Mode.memo_post.value:
+            print(23)
             self.db.update(
                 UserModel.construct(
-                    UserModel.__fields_set__.remove('mode'),
                     mode=Mode.memo_post.value).dict(),
                 key=self.user_id
             )
