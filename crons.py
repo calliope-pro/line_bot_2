@@ -10,7 +10,7 @@ from models import ReminderWithKeyModel
 from settings import DB_REMINDERS, JST, LINE_BOT_API, app, BASE_PROJECT_URL
 
 @app.lib.cron()
-def get_notify(event):
+def notify_works(event):
     now = datetime.now(JST).replace(tzinfo=None)
     if now.minute == 0 and now.hour % 4 == 2:
         response = requests.get(f'{BASE_PROJECT_URL}/notify/')
@@ -26,10 +26,12 @@ async def notify_reminders(event):
     coroutines = []
     for reminder in reminders:
         if reminder.datetime == now:
-            coroutines.append(
-                LINE_BOT_API.push_message(
-                    reminder.line_user_id,
-                    TextSendMessage(reminder.content)
+            asyncio.create_task(
+                coroutines.append(
+                    LINE_BOT_API.push_message(
+                        reminder.line_user_id,
+                        TextSendMessage(reminder.content)
+                    )
                 )
             )
     await asyncio.gather(*coroutines)
