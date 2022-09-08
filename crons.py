@@ -18,7 +18,7 @@ def get_notify(event):
         return
 
 @app.lib.cron()
-async def get_notify(event):
+async def notify_reminders(event):
     reminders_raw = DB_REMINDERS.fetch().items
     reminders = parse_obj_as(List[ReminderWithKeyModel], reminders_raw)
     now = datetime.utcnow().isoformat(timespec='minutes')
