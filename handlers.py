@@ -1,5 +1,5 @@
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List
 from uuid import uuid4
 
@@ -351,6 +351,8 @@ class EventsHandler:
                             label='リマインダー追加',
                             data=PostbackActionData.reminder_post_content.value,
                             mode='datetime',
+                            max=(datetime.now() + timedelta(days=30)).isoformat(),
+                            min=(datetime.now() + timedelta(minutes=1)).isoformat(),
                         )
                     ),
                     QuickReplyButton(
@@ -383,14 +385,13 @@ class EventsHandler:
                 )
             )
         elif data == PostbackActionData.reminder_post_content.value:
-            user_reminders_raw = DB_REMINDERS.fetch({'line_user_id': self.user_id}).items
-            user_reminders = parse_obj_as(List[ReminderWithKeyModel], user_reminders_raw)
             DB_REMINDERS.put(
                 ReminderModel(
                     datetime=event.postback.params['datetime'],
                     content='',
                     line_user_id=self.user_id,
                 ).dict(),
+                expire_at=datetime.fromisoformat(event.postback.params['datetime']) + timedelta(minutes=2),
                 key=str(datetime.now().timestamp())
             )
             DB_LINE_ACCOUNTS.update(
