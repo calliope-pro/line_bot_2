@@ -7,6 +7,7 @@ from fastapi import FastAPI
 from linebot import AsyncLineBotApi, WebhookParser
 from linebot.aiohttp_async_http_client import AiohttpAsyncHttpClient
 
+print(os.environ.get('DETA_RUNTIME', 'false'))
 if os.environ.get('DETA_RUNTIME', 'false') == 'true':
     from deta import App
     app = App(FastAPI())
@@ -30,10 +31,13 @@ IS_MAINTENANCE = bool(int(os.environ['IS_MAINTENANCE']))
 class PostbackActionData(Enum):
     normal = 'normal'
     memo = 'memo'
+    memo_list = 'memo_list'
     memo_post = 'memo_post'
     memo_deletion = 'memo_deletion'
     reminder = 'reminder'
-    reminder_registration = 'reminder_registration'
+    reminder_list = 'reminder_list'
+    reminder_post = 'reminder_post'
+    reminder_deletion = 'reminder_deletion'
     usage = 'usage'
     inquiry = 'inquiry'
     terminate = 'terminate'
