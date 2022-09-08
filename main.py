@@ -65,11 +65,11 @@ async def notify_works(request: Request, bg_tasks: BackgroundTasks):
         os.environ['MY_LINE_USER_ID'],
         messages_list if messages_list else TextSendMessage(text='更新無し'),
     )
-    return 'ok'
+    return 'OK'
 
 
 @app.get('/remind/')
-async def notify_reminders(event):
+async def notify_reminders():
     reminders_raw = DB_REMINDERS.fetch().items
     reminders = parse_obj_as(List[ReminderWithKeyModel], reminders_raw)
     now = datetime.utcnow().isoformat(timespec='minutes')
@@ -86,6 +86,7 @@ async def notify_reminders(event):
                 )
             )
     await asyncio.gather(*coroutines)
+    return 'OK'
 
 @app.get('/images/{file_name}')
 async def show_image(file_name: str, token: str):
