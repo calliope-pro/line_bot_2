@@ -61,16 +61,17 @@ class EventsHandler:
                     event.reply_token,
                     reply,
                 )
-        # elif user.mode == Mode.memo_post:
-        #     self.db.update(UserModel.)
-        #     await self.line_bot_api.reply_message(
-        #         event.reply_token,
-        #         [
-        #             TextSendMessage(text=)
-        #         ]
-
-
-        #     )
+        elif user.mode == Mode.memo_post.value:
+            self.db.update(
+                UserModel.construct(
+                    memos=user.memos + [event.message.text]
+                ).dict(),
+                key=user.key,
+            )
+            await self.line_bot_api.reply_message(
+                event.reply_token,
+                TextSendMessage(text=f'「{event.message.text}」を追加しました')
+            )
 
     async def handle_follow_event(self, event: FollowEvent):
         self.db.put(
