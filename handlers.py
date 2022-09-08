@@ -338,7 +338,7 @@ class EventsHandler:
                     TextSendMessage(text="403 Forbidden\nYou have no authority.")
                 )
 
-            now = datetime.now(JST)
+            now = datetime.utcnow().astimezone(JST)
             quick_reply = QuickReply(
                 items=[
                     QuickReplyButton(
@@ -394,7 +394,7 @@ class EventsHandler:
                     line_user_id=self.user_id,
                 ).dict(),
                 expire_at=datetime.fromisoformat(event.postback.params['datetime']) + timedelta(minutes=2),
-                key=str(datetime.now(JST).timestamp())
+                key=str(datetime.utcnow().astimezone(JST).timestamp())
             )
             DB_LINE_ACCOUNTS.update(
                 UserModel.construct(
