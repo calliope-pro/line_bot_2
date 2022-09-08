@@ -338,6 +338,7 @@ class EventsHandler:
                     TextSendMessage(text="403 Forbidden\nYou have no authority.")
                 )
 
+            now = datetime.now()
             quick_reply = QuickReply(
                 items=[
                     QuickReplyButton(
@@ -351,8 +352,9 @@ class EventsHandler:
                             label='リマインダー追加',
                             data=PostbackActionData.reminder_post_content.value,
                             mode='datetime',
-                            max=(datetime.now() + timedelta(days=30)).isoformat('t', 'minutes'),
-                            min=(datetime.now() + timedelta(minutes=1)).isoformat('t', 'minutes'),
+                            initial=(now + timedelta(minutes=5)).isoformat(timespec='minutes'),
+                            max=(now + timedelta(days=5)).isoformat(timespec='minutes'),
+                            min=(now + timedelta(minutes=1)).isoformat(timespec='minutes'),
                         )
                     ),
                     QuickReplyButton(
