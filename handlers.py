@@ -85,6 +85,41 @@ class EventsHandler:
                     quick_reply=quick_reply,
                 ),
             )
+        elif user.mode == Mode.memo_deletion.value:
+            quick_reply = QuickReply(
+                items=[
+                    QuickReplyButton(
+                        action=PostbackAction(
+                            label='メモ削除を終了する',
+                            data='terminate',
+                        )
+                    ),
+                ]
+            )
+            try:
+                target_number = int(event.message.text)
+                target_memo = user.memos.pop(target_number - 1)
+                self.db.update(
+                    UserModel.construct(
+                        memos=user.memos
+                    ).dict(),
+                    key=user.key,
+                )
+                await self.line_bot_api.reply_message(
+                    event.reply_token,
+                    TextSendMessage(
+                        text=f'「{target_number}: {target_memo}」を削除しました。\n終了したい場合は以下のボタンを押してください。',
+                        quick_reply=quick_reply,
+                    ),
+                )
+            except (ValueError, IndexError):
+                await self.line_bot_api.reply_message(
+                    event.reply_token,
+                    TextSendMessage(
+                        text=f'有効な番号を入力してください。\n終了したい場合は以下のボタンを押してください。',
+                        quick_reply=quick_reply,
+                    ),
+                )
 
     async def handle_follow_event(self, event: FollowEvent):
         self.db.put(
@@ -136,7 +171,7 @@ class EventsHandler:
         elif data == 'memo_list':
             user = UserWithKeyModel.parse_obj(self.db.get(self.user_id))
             if user.memos:
-                text = '\n'.join(f'{idx}: {value}' for idx, value in enumerate(user.memos, 1))
+                text = '\n'.join(f'{number}: {value}' for number, value in enumerate(user.memos, 1))
             else:
                 text = 'クラウドに保存されているメモはありません。'
             await self.line_bot_api.reply_message(
@@ -154,14 +189,14 @@ class EventsHandler:
             await self.line_bot_api.reply_message(
                 event.reply_token,
                 TextSendMessage(
-                    text='メモしたいことを入力してください',
+                    text='メモしたいことを入力してください。',
                 )
             )
         elif data == Mode.memo_deletion.value:
             await self.line_bot_api.reply_message(
                 event.reply_token,
                 TextSendMessage(
-                    text='削除したいメモの番号を入力してください',
+                    text='削除したいメモの番号を入力してください。',
                 )
             )
         elif data == 'reminder':
