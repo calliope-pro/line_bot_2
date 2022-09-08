@@ -38,7 +38,7 @@ async def handle_line_request(request: Request, bg_tasks: BackgroundTasks):
 
 
 @app.get('/notify/')
-async def notify(request: Request, bg_tasks: BackgroundTasks):
+async def notify_works(request: Request, bg_tasks: BackgroundTasks):
     messages_list = []
     
     results = await asyncio.gather(
@@ -66,6 +66,26 @@ async def notify(request: Request, bg_tasks: BackgroundTasks):
         messages_list if messages_list else TextSendMessage(text='更新無し'),
     )
     return 'ok'
+
+
+@app.get('/remind/')
+async def notify_reminders(event):
+    reminders_raw = DB_REMINDERS.fetch().items
+    reminders = parse_obj_as(List[ReminderWithKeyModel], reminders_raw)
+    now = datetime.utcnow().isoformat(timespec='minutes')
+
+    coroutines = []
+    for reminder in reminders:
+        if reminder.datetime == now:
+            asyncio.create_task(
+                coroutines.append(
+                    LINE_BOT_API.push_message(
+                        reminder.line_user_id,
+                        TextSendMessage(reminder.content)
+                    )
+                )
+            )
+    await asyncio.gather(*coroutines)
 
 @app.get('/images/{file_name}')
 async def show_image(file_name: str, token: str):

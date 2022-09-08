@@ -18,20 +18,7 @@ def notify_works(event):
         return
 
 @app.lib.cron()
-async def notify_reminders(event):
-    reminders_raw = DB_REMINDERS.fetch().items
-    reminders = parse_obj_as(List[ReminderWithKeyModel], reminders_raw)
-    now = datetime.utcnow().isoformat(timespec='minutes')
-
-    coroutines = []
-    for reminder in reminders:
-        if reminder.datetime == now:
-            asyncio.create_task(
-                coroutines.append(
-                    LINE_BOT_API.push_message(
-                        reminder.line_user_id,
-                        TextSendMessage(reminder.content)
-                    )
-                )
-            )
-    await asyncio.gather(*coroutines)
+def notify_reminders(event):
+    response = requests.get(f'{BASE_PROJECT_URL}/remind/')
+    print(response.status_code)
+    return
