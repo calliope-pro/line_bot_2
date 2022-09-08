@@ -405,6 +405,30 @@ class EventsHandler:
                     text='リマインドしたいことを入力してください。',
                 )
             )
+        elif data == PostbackActionData.reminder_deletion.value:
+            DB_LINE_ACCOUNTS.update(
+                UserModel.construct(
+                    mode=PostbackActionData.reminder_deletion.value
+                ).dict(),
+                key=self.user_id
+            )
+            quick_reply = QuickReply(
+                items=[
+                    QuickReplyButton(
+                        action=PostbackAction(
+                            label='リマインダー削除を終了する',
+                            data=PostbackActionData.terminate.value,
+                        )
+                    ),
+                ]
+            )
+            await self.line_bot_api.reply_message(
+                event.reply_token,
+                TextSendMessage(
+                    text='削除したいリマインダーの番号を入力してください。\n\n終了したい場合は以下のボタンを押してください。',
+                    quick_reply=quick_reply,
+                )
+            )
         elif data == PostbackActionData.usage.value:
             await self.line_bot_api.reply_message(
                 event.reply_token,
