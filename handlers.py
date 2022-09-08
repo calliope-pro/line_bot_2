@@ -352,8 +352,8 @@ class EventsHandler:
                             label='リマインダー追加',
                             data=PostbackActionData.reminder_post_content.value,
                             mode='datetime',
-                            initial=(now + timedelta(minutes=5)).isoformat(timespec='minutes'),
-                            max=(now + timedelta(days=5)).isoformat(timespec='minutes'),
+                            initial=(now + timedelta(minutes=1)).isoformat(timespec='minutes'),
+                            max=(now + timedelta(days=30)).isoformat(timespec='minutes'),
                             min=(now + timedelta(minutes=1)).isoformat(timespec='minutes'),
                         )
                     ),
@@ -393,8 +393,8 @@ class EventsHandler:
                     content='',
                     line_user_id=self.user_id,
                 ).dict(),
-                expire_at=datetime.fromisoformat(event.postback.params['datetime']) + timedelta(minutes=2),
-                key=str(datetime.utcnow().astimezone(JST).timestamp())
+                expire_at=datetime.fromisoformat(event.postback.params['datetime']) - timedelta(hours=9),
+                key=str(datetime.now(JST).timestamp())
             )
             DB_LINE_ACCOUNTS.update(
                 UserModel.construct(
