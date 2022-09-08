@@ -389,12 +389,12 @@ class EventsHandler:
         elif data == PostbackActionData.reminder_post_content.value:
             DB_REMINDERS.put(
                 ReminderModel(
-                    datetime=event.postback.params['datetime'],
+                    datetime=(datetime.fromisoformat(event.postback.params['datetime']) - timedelta(hours=9)).isoformat(timespec='minutes'),
                     content='',
                     line_user_id=self.user_id,
                 ).dict(),
-                expire_at=datetime.fromisoformat(event.postback.params['datetime']) - timedelta(hours=9),
-                key=str(datetime.now(JST).timestamp())
+                expire_at=datetime.fromisoformat(event.postback.params['datetime']) - timedelta(hours=8, minutes=59),
+                key=str(datetime.now().timestamp())
             )
             DB_LINE_ACCOUNTS.update(
                 UserModel.construct(
