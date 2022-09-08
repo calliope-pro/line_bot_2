@@ -1,5 +1,4 @@
 import os
-import re
 from typing import List
 from uuid import uuid4
 
@@ -9,8 +8,9 @@ from linebot import AsyncLineBotApi
 from linebot.models.actions import PostbackAction
 from linebot.models.events import Event, MessageEvent, FollowEvent, PostbackEvent
 from linebot.models.send_messages import TextSendMessage, QuickReply, QuickReplyButton
+from models import UserModel, UserWithKeyModel
 
-from settings import BASE_PROJECT_URL
+from settings import BASE_PROJECT_URL, Mode
 
 class EventsHandler:
     def __init__(self, line_bot_api: AsyncLineBotApi, events: List[Event], db: _Base, drive: _Drive):
@@ -21,50 +21,66 @@ class EventsHandler:
         self.user_id = None
 
     async def handle_message_event(self, event: MessageEvent):
-        user_token = self.db.get(self.user_id)['token']
-        if event.message.type == 'image':
-            data = await self.line_bot_api.get_message_content(event.message.id)
-            binary_data = b''
-            async for b in data.iter_content():
-                binary_data += b
-            file_name = self.drive.put(
-                name=f'{self.user_id}/{event.message.id}.jpeg',
-                data=binary_data,
-                content_type=data.content_type,
-            )
-            await self.line_bot_api.reply_message(
-                event.reply_token,
-                TextSendMessage(
-                    text=f'{BASE_PROJECT_URL}/images{file_name.replace(self.user_id, "", 1)}?token={user_token}\nに保存しました'
+        user = UserWithKeyModel.parse_obj(self.db.get(self.user_id))
+        if user.mode == Mode.normal:
+            if event.message.type == 'image':
+                data = await self.line_bot_api.get_message_content(event.message.id)
+                binary_data = b''
+                async for b in data.iter_content():
+                    binary_data += b
+                file_name = self.drive.put(
+                    name=f'{self.user_id}/{event.message.id}.jpeg',
+                    data=binary_data,
+                    content_type=data.content_type,
                 )
-            )
-        else:
-            reply = [
-                TextSendMessage(text=f'You: {event.message.text}'),
-            ]
-            image_file_paths = self.drive.list(prefix=self.user_id)["names"]
-            if image_file_paths:
-                reply.append(
+                await self.line_bot_api.reply_message(
+                    event.reply_token,
                     TextSendMessage(
-                        text="\n\n".join(map(lambda x: f'{BASE_PROJECT_URL}/images{x.replace(self.user_id, "", 1)}?token={user_token}', image_file_paths))
+                        text=f'{BASE_PROJECT_URL}/images{file_name.replace(self.user_id, "", 1)}?token={user.token}\nに保存しました'
                     )
                 )
             else:
-                reply.append(
-                    TextSendMessage(
-                        text="クラウドに保存されている画像はありません。"
+                reply = [
+                    TextSendMessage(text=f'You: {event.message.text}'),
+                ]
+                image_file_paths = self.drive.list(prefix=self.user_id)["names"]
+                if image_file_paths:
+                    reply.append(
+                        TextSendMessage(
+                            text="\n\n".join(map(lambda x: f'{BASE_PROJECT_URL}/images{x.replace(self.user_id, "", 1)}?token={user.token}', image_file_paths))
+                        )
                     )
-                )
+                else:
+                    reply.append(
+                        TextSendMessage(
+                            text="クラウドに保存されている画像はありません。"
+                        )
+                    )
 
-            await self.line_bot_api.reply_message(
-                event.reply_token,
-                reply,
-            )
+                await self.line_bot_api.reply_message(
+                    event.reply_token,
+                    reply,
+                )
+        # elif user.mode == Mode.memo_post:
+        #     self.db.update(UserModel.)
+        #     await self.line_bot_api.reply_message(
+        #         event.reply_token,
+        #         [
+        #             TextSendMessage(text=)
+        #         ]
+
+
+        #     )
 
     async def handle_follow_event(self, event: FollowEvent):
-        self.db.put({
-            'token': str(uuid4()),
-        }, key=self.user_id)
+        self.db.put(
+            UserModel(
+                token=str(uuid4()),
+                mode=Mode.normal,
+                memos=[]
+            ).dict(),
+            key=self.user_id
+        )
 
         await self.line_bot_api.reply_message(
             event.reply_token,
@@ -74,35 +90,64 @@ class EventsHandler:
         )
     
     async def handle_postback_event(self, event: PostbackEvent):
-        mode = event.postback.data
-        print(mode)
-        if mode == 'memo':
+        data = event.postback.data
+        if data == 'memo':
+            quick_reply = QuickReply(
+                items=[
+                    QuickReplyButton(
+                        action=PostbackAction(
+                            label='メモ一覧',
+                            data='memo_list',
+                        )
+                    ),
+                    QuickReplyButton(
+                        action=PostbackAction(
+                            label='メモ追加',
+                            data='memo_post',
+                        )
+                    ),
+                    QuickReplyButton(
+                        action=PostbackAction(
+                            label='メモ削除',
+                            data='memo_deletion',
+                        )
+                    ),
+                ]
+            )
             await self.line_bot_api.reply_message(
                 event.reply_token,
                 TextSendMessage(
                     text='メモ機能の何を使いますか？',
-                    quick_reply=QuickReply(
-                        items=[
-                            QuickReplyButton(
-                                action=PostbackAction(
-                                    label='メモ一覧',
-                                    data='memo_list',
-                                )
-                            ),
-                            QuickReplyButton(
-                                action=PostbackAction(
-                                    label='メモ追加',
-                                    data='memo_post',
-                                )
-                            ),
-                            QuickReplyButton(
-                                action=PostbackAction(
-                                    label='メモ削除',
-                                    data='memo_deletion',
-                                )
-                            ),
-                        ]
-                    )
+                    quick_reply=quick_reply,
+                )
+            )
+        elif data == Mode.memo_post:
+            self.db.update(
+                UserModel(mode=Mode.memo_post).dict(),
+                key=self.user_id
+            )
+            await self.line_bot_api.reply_message(
+                event.reply_token,
+                TextSendMessage(
+                    text='メモしたいことを入力してください',
+                )
+            )
+        elif data == 'reminder':
+            await self.line_bot_api.reply_message(
+                event.reply_token,
+                TextSendMessage(
+                    text='どういう用件ですか？',
+                )
+            )
+        elif data == 'usage':
+            await self.line_bot_api.reply_message(
+                event.reply_token,
+                TextSendMessage(
+                    '''このcalliope_botは現在大きく3つの機能を有しております。
+①写真を投稿することで自動的にクラウドに保存され、保存先がurlとして取得できます。平常時メッセージを送った際には、クラウドに保存されている全ての画像のurlを取得できます。
+②メモ一覧, 追加, 削除がリッチメニューを通して操作できます。(作成中)
+③時間を設定しリマインダーを登録することができます。(作成中)
+'''
                 )
             )
 

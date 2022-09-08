@@ -1,3 +1,4 @@
+from enum import Enum
 import os
 
 from deta import Deta
@@ -22,3 +23,9 @@ deta = Deta(os.environ['DETA_PROJECT_KEY'])
 DB_LINE_ACCOUNTS = deta.Base('line_accounts')
 DB_SCRAPE_RESULTS = deta.Base('scrape_results')
 DRIVE_LINE_BOT_DRIVE = deta.Drive('line-bot-drive')
+
+class Mode(Enum):
+    normal = 'normal'
+    memo_post = 'memo_post'
+    memo_deletion = 'memo_deletion'
+    remider_registration = 'reminder_registration'
