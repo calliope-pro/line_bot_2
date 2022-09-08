@@ -62,22 +62,22 @@ class EventsHandler:
                     reply,
                 )
         elif user.mode == Mode.memo_post.value:
+            quick_reply = QuickReply(
+                items=[
+                    QuickReplyButton(
+                        action=PostbackAction(
+                            label='メモ追加を終了する',
+                            data='terminate',
+                        )
+                    ),
+                ]
+            )
             if event.message.text:
                 self.db.update(
                     UserModel.construct(
                         memos=user.memos + [event.message.text]
                     ).dict(),
                     key=user.key,
-                )
-                quick_reply = QuickReply(
-                    items=[
-                        QuickReplyButton(
-                            action=PostbackAction(
-                                label='メモ追加を終了する',
-                                data='terminate',
-                            )
-                        ),
-                    ]
                 )
                 await self.line_bot_api.reply_message(
                     event.reply_token,
