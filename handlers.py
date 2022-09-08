@@ -123,7 +123,7 @@ class EventsHandler:
             )
         elif data == Mode.memo_post.value:
             self.db.update(
-                UserModel(mode=Mode.memo_post).dict(),
+                UserModel(mode=Mode.memo_post.value).dict(),
                 key=self.user_id
             )
             await self.line_bot_api.reply_message(
