@@ -81,8 +81,9 @@ class EventsHandler:
             await self.line_bot_api.reply_message(
                 event.reply_token,
                 TextSendMessage(
-                    text=f'「{event.message.text}」を追加しました'),
+                    text=f'「{event.message.text}」を追加しました',
                     quick_reply=quick_reply,
+                ),
             )
 
     async def handle_follow_event(self, event: FollowEvent):
