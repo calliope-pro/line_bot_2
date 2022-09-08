@@ -139,17 +139,20 @@ class EventsHandler:
                     ),
                 )
         elif user.mode == PostbackActionData.reminder_post_content.value:
+            print('sss')
             quick_reply = QuickReply(
                 items=[
                     QuickReplyButton(
                         action=PostbackAction(
-                            label='リマインダー追加を終了する',
+                            label='追加を終了する',
                             data=PostbackActionData.terminate.value,
                         )
                     ),
                 ]
             )
+            print('aaaa')
             target_text = event.message.text.strip()
+            print('asfdgf')
             if target_text:
                 print(target_text)
                 user_reminder = ReminderWithKeyModel.parse_obj(DB_REMINDERS.fetch({'line_user_id': self.user_id}).last)
