@@ -338,7 +338,7 @@ class EventsHandler:
                     TextSendMessage(text="403 Forbidden\nYou have no authority.")
                 )
 
-            now = datetime.utcnow().astimezone(JST)
+            now = datetime.now()
             quick_reply = QuickReply(
                 items=[
                     QuickReplyButton(
