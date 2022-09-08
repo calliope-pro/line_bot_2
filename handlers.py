@@ -351,8 +351,8 @@ class EventsHandler:
                             label='リマインダー追加',
                             data=PostbackActionData.reminder_post_content.value,
                             mode='datetime',
-                            max=(datetime.now() + timedelta(days=30)).isoformat(),
-                            min=(datetime.now() + timedelta(minutes=1)).isoformat(),
+                            max=(datetime.now() + timedelta(days=30)).isoformat('t'),
+                            min=(datetime.now() + timedelta(minutes=1)).isoformat('t'),
                         )
                     ),
                     QuickReplyButton(
