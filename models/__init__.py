@@ -11,7 +11,7 @@ class PushContentModel(BaseModel):
     body: str
 
 class ReminderModel(BaseModel):
-    datetime: datetime
+    datetime: str
     content: str
     line_user_id: str
 
