@@ -151,8 +151,8 @@ class EventsHandler:
             )
             target_text = event.message.text.strip()
             if target_text:
-                print(DB_REMINDERS.fetch({'line_user_id': self.user_id}).last)
-                user_reminder = ReminderWithKeyModel.parse_obj(DB_REMINDERS.fetch({'line_user_id': self.user_id}).last)
+                print(DB_REMINDERS.fetch({'line_user_id': self.user_id}).items[-1])
+                user_reminder = ReminderWithKeyModel.parse_obj(DB_REMINDERS.fetch({'line_user_id': self.user_id}).items[-1])
                 print(user_reminder.dict())
                 if user_reminder.content:
                     await self.line_bot_api.reply_message(
