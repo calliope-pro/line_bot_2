@@ -83,7 +83,7 @@ class EventsHandler:
                 await self.line_bot_api.reply_message(
                     event.reply_token,
                     TextSendMessage(
-                        text=f'「{target_text}」を追加しました。\n終了したい場合は以下のボタンを押してください。',
+                        text=f'「{target_text}」を追加しました。\n\n終了したい場合は以下のボタンを押してください。',
                         quick_reply=quick_reply,
                     ),
                 )
@@ -91,7 +91,7 @@ class EventsHandler:
                 await self.line_bot_api.reply_message(
                     event.reply_token,
                     TextSendMessage(
-                        text=f'有効な文を入力してください。\n終了したい場合は以下のボタンを押してください。',
+                        text=f'有効な文を入力してください。\n\n終了したい場合は以下のボタンを押してください。',
                         quick_reply=quick_reply,
                     ),
                 )
@@ -133,7 +133,7 @@ class EventsHandler:
                 await self.line_bot_api.reply_message(
                     event.reply_token,
                     TextSendMessage(
-                        text=f'有効な番号を入力してください。\n終了したい場合は以下のボタンを押してください。',
+                        text=f'有効な番号を入力してください。\n\n終了したい場合は以下のボタンを押してください。',
                         quick_reply=quick_reply,
                     ),
                 )
@@ -217,7 +217,7 @@ class EventsHandler:
             await self.line_bot_api.reply_message(
                 event.reply_token,
                 TextSendMessage(
-                    text='メモしたいことを入力してください。',
+                    text='メモしたいことを入力してください。\n\n終了したい場合は以下のボタンを押してください。',
                     quick_reply=quick_reply,
                 )
             )
@@ -240,7 +240,7 @@ class EventsHandler:
             await self.line_bot_api.reply_message(
                 event.reply_token,
                 TextSendMessage(
-                    text='削除したいメモの番号を入力してください。',
+                    text='削除したいメモの番号を入力してください。\n\n終了したい場合は以下のボタンを押してください。',
                     quick_reply=quick_reply,
                 )
             )
