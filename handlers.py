@@ -12,7 +12,7 @@ from linebot.models.send_messages import TextSendMessage, QuickReply, QuickReply
 
 from models import ReminderModel, ReminderWithKeyModel, UserModel, UserWithKeyModel
 from pydantic import parse_obj_as
-from settings import BASE_PROJECT_URL, DB_LINE_ACCOUNTS, DB_REMINDERS, IS_MAINTENANCE, PostbackActionData
+from settings import BASE_PROJECT_URL, DB_LINE_ACCOUNTS, DB_REMINDERS, IS_MAINTENANCE, JST, PostbackActionData
 
 class EventsHandler:
     def __init__(self, line_bot_api: AsyncLineBotApi, events: List[Event], drive: _Drive):
@@ -338,7 +338,7 @@ class EventsHandler:
                     TextSendMessage(text="403 Forbidden\nYou have no authority.")
                 )
 
-            now = datetime.now()
+            now = datetime.now(JST)
             quick_reply = QuickReply(
                 items=[
                     QuickReplyButton(
@@ -394,7 +394,7 @@ class EventsHandler:
                     line_user_id=self.user_id,
                 ).dict(),
                 expire_at=datetime.fromisoformat(event.postback.params['datetime']) + timedelta(minutes=2),
-                key=str(datetime.now().timestamp())
+                key=str(datetime.now(JST).timestamp())
             )
             DB_LINE_ACCOUNTS.update(
                 UserModel.construct(

@@ -1,3 +1,4 @@
+from datetime import timedelta, timezone
 from enum import Enum
 import os
 
@@ -26,6 +27,8 @@ DB_SCRAPE_RESULTS = deta.Base('scrape_results')
 DRIVE_LINE_BOT_DRIVE = deta.Drive('line-bot-drive')
 
 IS_MAINTENANCE = bool(int(os.environ['IS_MAINTENANCE']))
+
+JST = timezone(timedelta(hours=9), 'JST')
 
 class PostbackActionData(Enum):
     normal = 'normal'
