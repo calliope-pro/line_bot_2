@@ -167,7 +167,7 @@ class EventsHandler:
                     await self.line_bot_api.reply_message(
                         event.reply_token,
                         TextSendMessage(
-                            text=f'「{target_text}」を追加しました。\n\n終了したい場合は以下のボタンを押してください。',
+                            text=f'「{(datetime.fromisoformat(user_reminder.datetime) + timedelta(hours=9)).strftime("%Y/%m/%d %H:%M")}\n{target_text}」を追加しました。\n\n終了したい場合は以下のボタンを押してください。',
                             quick_reply=quick_reply,
                         ),
                     )
@@ -200,13 +200,16 @@ class EventsHandler:
                 DB_REMINDERS.delete(key=target_user_reminder.key)
                 if user_reminders:
                     reminder_list_text = '現在クラウドに保存されているリマインダーは↓\n'
-                    reminder_list_text += '\n'.join(f'{number}\n{reminder.datetime} {reminder.content}' for number, reminder in enumerate(user_reminders, 1))
+                    reminder_list_text += '\n'.join(
+                        f'{number}\n{(datetime.fromisoformat(reminder.datetime) + timedelta(hours=9)).strftime("%Y/%m/%d %H:%M")} {reminder.content}'
+                            for number, reminder in enumerate(user_reminders, 1)
+                    )
                 else:
                     reminder_list_text = 'クラウドに保存されているリマインダーはありません。'
                 await self.line_bot_api.reply_message(
                     event.reply_token,
                     TextSendMessage(
-                        text=f'「{target_number}\n{target_user_reminder.datetime} {target_user_reminder.content}」を削除しました。\n\n{reminder_list_text}\n\n終了したい場合は以下のボタンを押してください。',
+                        text=f'「{target_number}\n{(datetime.fromisoformat(target_user_reminder.datetime) + timedelta(hours=9)).strftime("%Y/%m/%d %H:%M")} {target_user_reminder.content}」を削除しました。\n\n{reminder_list_text}\n\n終了したい場合は以下のボタンを押してください。',
                         quick_reply=quick_reply,
                     ),
                 )
@@ -378,7 +381,7 @@ class EventsHandler:
             if user_reminders:
                 reminder_list_text = '現在クラウドに保存されているリマインダーは↓\n'
                 reminder_list_text += '\n'.join(
-                    f'{number}:\n{datetime.fromisoformat(reminder.datetime).astimezone(JST).strftime("%Y/%m/%d %H:%M")} {reminder.content}'
+                    f'{number}:\n{(datetime.fromisoformat(reminder.datetime) + timedelta(hours=9)).strftime("%Y/%m/%d %H:%M")} {reminder.content}'
                         for number, reminder in enumerate(user_reminders, 1)
                 )
             else:
