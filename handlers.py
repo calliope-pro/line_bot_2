@@ -10,7 +10,7 @@ from linebot.models.events import Event, MessageEvent, FollowEvent, PostbackEven
 from linebot.models.send_messages import TextSendMessage, QuickReply, QuickReplyButton
 from models import UserModel, UserWithKeyModel
 
-from settings import BASE_PROJECT_URL, Mode
+from settings import BASE_PROJECT_URL, IS_MAINTENANCE, Mode
 
 class EventsHandler:
     def __init__(self, line_bot_api: AsyncLineBotApi, events: List[Event], db: _Base, drive: _Drive):
@@ -275,28 +275,30 @@ class EventsHandler:
     async def handler(self):
         # ベント処理List[Event]
         for event in self.events:
-            try:
-                assert event.source.user_id == os.environ['MY_LINE_USER_ID'], 'user_idが異なります'
-                self.user_id = event.source.user_id
-
-                # メッセージイベント
-                if isinstance(event, MessageEvent):
-                    await self.handle_message_event(event)
-                    break
-                # ポストバックイベント
-                elif isinstance(event, PostbackEvent):
-                    await self.handle_postback_event(event)
-                    break
-                # 友達追加イベント
-                elif isinstance(event, FollowEvent):
-                    await self.handle_follow_event(event)
+            if IS_MAINTENANCE:
+                try:
+                    assert event.source.user_id == os.environ['MY_LINE_USER_ID'], 'user_idが異なります'
+                except AssertionError as e:
+                    print(e)
+                    print(f'{event.source.user_id}から発信')
+                    await self.line_bot_api.reply_message(
+                        event.reply_token,
+                        TextSendMessage(text="403 Forbidden\nYou have no authority.")
+                    )
                     break
 
-            except AssertionError as e:
-                print(e)
-                print(f'{event.source.user_id}から発信')
-                await self.line_bot_api.reply_message(
-                    event.reply_token,
-                    TextSendMessage(text="403 Forbidden\nYou have no authority.")
-                )
+            self.user_id = event.source.user_id
+
+            # メッセージイベント
+            if isinstance(event, MessageEvent):
+                await self.handle_message_event(event)
                 break
+            # ポストバックイベント
+            elif isinstance(event, PostbackEvent):
+                await self.handle_postback_event(event)
+                break
+            # 友達追加イベント
+            elif isinstance(event, FollowEvent):
+                await self.handle_follow_event(event)
+                break
+

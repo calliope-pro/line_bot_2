@@ -24,6 +24,8 @@ DB_LINE_ACCOUNTS = deta.Base('line_accounts')
 DB_SCRAPE_RESULTS = deta.Base('scrape_results')
 DRIVE_LINE_BOT_DRIVE = deta.Drive('line-bot-drive')
 
+IS_MAINTENANCE = bool(int(os.environ.get('IS_MAINTENANCE', 1)))
+
 class Mode(Enum):
     normal = 'normal'
     memo_post = 'memo_post'
