@@ -151,7 +151,9 @@ class EventsHandler:
             )
             target_text = event.message.text.strip()
             if target_text:
+                print(target_text)
                 user_reminder = ReminderWithKeyModel.parse_obj(DB_REMINDERS.fetch({'line_user_id': self.user_id}).last)
+                print(user_reminder.dict())
                 if user_reminder.content:
                     await self.line_bot_api.reply_message(
                         event.reply_token,
@@ -163,7 +165,7 @@ class EventsHandler:
                 else:
                     user_reminder.content = target_text
                     DB_REMINDERS.update(
-                        user_reminder.content,
+                        user_reminder.dict(),
                         key=user_reminder.key,
                     )
                     await self.line_bot_api.reply_message(
@@ -346,7 +348,6 @@ class EventsHandler:
         elif data == PostbackActionData.reminder_post_content.value:
             user_reminders_raw = DB_REMINDERS.fetch({'line_user_id': self.user_id}).items
             user_reminders = parse_obj_as(List[ReminderWithKeyModel], user_reminders_raw)
-            print(event.postback.params['datetime'])
             DB_REMINDERS.put(
                 ReminderModel(
                     datetime=event.postback.params['datetime'],
@@ -355,7 +356,6 @@ class EventsHandler:
                 ).dict(),
                 key=str(datetime.now().timestamp())
             )
-            print(6178)
             DB_LINE_ACCOUNTS.update(
                 UserModel.construct(
                     mode=PostbackActionData.reminder_post_content.value
