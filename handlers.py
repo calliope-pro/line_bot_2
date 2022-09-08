@@ -344,8 +344,11 @@ class EventsHandler:
                 )
             )
         elif data == PostbackActionData.reminder_post_content.value:
+            print(event.postback.params)
             user_reminders_raw = DB_REMINDERS.fetch({'line_user_id': self.user_id}).items
+            print(user_reminders_raw)
             user_reminders = parse_obj_as(List[ReminderWithKeyModel], user_reminders_raw)
+            print(user_reminders)
             DB_REMINDERS.put(
                 ReminderModel(
                     datetime=event.postback.params.datetime,
