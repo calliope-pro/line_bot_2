@@ -204,10 +204,21 @@ class EventsHandler:
                     mode=Mode.memo_post.value).dict(),
                 key=self.user_id
             )
+            quick_reply = QuickReply(
+                items=[
+                    QuickReplyButton(
+                        action=PostbackAction(
+                            label='メモ追加を終了する',
+                            data='terminate',
+                        )
+                    ),
+                ]
+            )
             await self.line_bot_api.reply_message(
                 event.reply_token,
                 TextSendMessage(
                     text='メモしたいことを入力してください。',
+                    quick_reply=quick_reply,
                 )
             )
         elif data == Mode.memo_deletion.value:
@@ -216,10 +227,21 @@ class EventsHandler:
                     mode=Mode.memo_deletion.value).dict(),
                 key=self.user_id
             )
+            quick_reply = QuickReply(
+                items=[
+                    QuickReplyButton(
+                        action=PostbackAction(
+                            label='メモ削除を終了する',
+                            data='terminate',
+                        )
+                    ),
+                ]
+            )
             await self.line_bot_api.reply_message(
                 event.reply_token,
                 TextSendMessage(
                     text='削除したいメモの番号を入力してください。',
+                    quick_reply=quick_reply,
                 )
             )
         elif data == 'reminder':
@@ -235,7 +257,7 @@ class EventsHandler:
                 TextSendMessage(
                     '''このcalliope_botは現在大きく3つの機能を有しております。
 ①写真を投稿することで自動的にクラウドに保存され、保存先がurlとして取得できます。平常時メッセージを送った際には、クラウドに保存されている全ての画像のurlを取得できます。
-②メモ一覧, 追加, 削除がリッチメニューを通して操作できます。(作成中)
+②メモ一覧, 追加, 削除がリッチメニューを通して操作できます。
 ③時間を設定しリマインダーを登録することができます。(作成中)'''
                 )
             )
