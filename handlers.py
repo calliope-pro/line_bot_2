@@ -139,7 +139,6 @@ class EventsHandler:
                     ),
                 )
         elif user.mode == PostbackActionData.reminder_post_content.value:
-            print('sss')
             quick_reply = QuickReply(
                 items=[
                     QuickReplyButton(
@@ -150,11 +149,9 @@ class EventsHandler:
                     ),
                 ]
             )
-            print('aaaa')
             target_text = event.message.text.strip()
-            print('asfdgf')
             if target_text:
-                print(target_text)
+                print(DB_REMINDERS.fetch({'line_user_id': self.user_id}).last)
                 user_reminder = ReminderWithKeyModel.parse_obj(DB_REMINDERS.fetch({'line_user_id': self.user_id}).last)
                 print(user_reminder.dict())
                 if user_reminder.content:
