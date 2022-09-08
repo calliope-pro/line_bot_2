@@ -22,7 +22,7 @@ class EventsHandler:
 
     async def handle_message_event(self, event: MessageEvent):
         user = UserWithKeyModel.parse_obj(self.db.get(self.user_id))
-        if user.mode == Mode.normal:
+        if user.mode == Mode.normal.value:
             if event.message.type == 'image':
                 data = await self.line_bot_api.get_message_content(event.message.id)
                 binary_data = b''
@@ -76,7 +76,7 @@ class EventsHandler:
         self.db.put(
             UserModel(
                 token=str(uuid4()),
-                mode=Mode.normal,
+                mode=Mode.normal.value,
                 memos=[]
             ).dict(),
             key=self.user_id
@@ -121,7 +121,7 @@ class EventsHandler:
                     quick_reply=quick_reply,
                 )
             )
-        elif data == Mode.memo_post:
+        elif data == Mode.memo_post.value:
             self.db.update(
                 UserModel(mode=Mode.memo_post).dict(),
                 key=self.user_id
@@ -146,8 +146,7 @@ class EventsHandler:
                     '''このcalliope_botは現在大きく3つの機能を有しております。
 ①写真を投稿することで自動的にクラウドに保存され、保存先がurlとして取得できます。平常時メッセージを送った際には、クラウドに保存されている全ての画像のurlを取得できます。
 ②メモ一覧, 追加, 削除がリッチメニューを通して操作できます。(作成中)
-③時間を設定しリマインダーを登録することができます。(作成中)
-'''
+③時間を設定しリマインダーを登録することができます。(作成中)'''
                 )
             )
 
