@@ -1,4 +1,6 @@
-from typing import List, Optional
+from typing import Dict, List, Optional
+from datetime import datetime
+
 from pydantic import BaseModel
 
 class KeyModelMixin(BaseModel):
@@ -7,6 +9,14 @@ class KeyModelMixin(BaseModel):
 class PushContentModel(BaseModel):
     type: Optional[str] = None
     body: str
+
+class ReminderModel(BaseModel):
+    datetime: datetime
+    content: str
+    line_user_id: str
+
+class ReminderWithKeyModel(ReminderModel, KeyModelMixin):
+    pass
 
 class UserModel(BaseModel):
     token: str

@@ -7,7 +7,6 @@ from fastapi import FastAPI
 from linebot import AsyncLineBotApi, WebhookParser
 from linebot.aiohttp_async_http_client import AiohttpAsyncHttpClient
 
-# if os.environ.get('DETA_RUNTIME', 'false') == 'true':
 from deta import App
 app = App(FastAPI())
 
@@ -22,6 +21,7 @@ LINE_PARSER = WebhookParser(CHANNEL_SECRET)
 deta = Deta(os.environ['DETA_PROJECT_KEY'])
 
 DB_LINE_ACCOUNTS = deta.Base('line_accounts')
+DB_REMINDERS = deta.Base('reminders')
 DB_SCRAPE_RESULTS = deta.Base('scrape_results')
 DRIVE_LINE_BOT_DRIVE = deta.Drive('line-bot-drive')
 
@@ -35,7 +35,8 @@ class PostbackActionData(Enum):
     memo_deletion = 'memo_deletion'
     reminder = 'reminder'
     reminder_list = 'reminder_list'
-    reminder_post = 'reminder_post'
+    reminder_post_datetime = 'reminder_post_datetime'
+    reminder_post_content = 'reminder_post_content'
     reminder_deletion = 'reminder_deletion'
     usage = 'usage'
     inquiry = 'inquiry'
