@@ -141,7 +141,7 @@ class EventsHandler:
                 items=[
                     QuickReplyButton(
                         action=PostbackAction(
-                            label='追加を終了する',
+                            label='リマインダー追加を終了する',
                             data=PostbackActionData.terminate.value,
                         )
                     ),
@@ -176,6 +176,45 @@ class EventsHandler:
                     event.reply_token,
                     TextSendMessage(
                         text=f'有効な文を入力してください。\n\n終了したい場合は以下のボタンを押してください。',
+                        quick_reply=quick_reply,
+                    ),
+                )
+        elif user.mode == PostbackActionData.reminder_deletion.value:
+            quick_reply = QuickReply(
+                items=[
+                    QuickReplyButton(
+                        action=PostbackAction(
+                            label='リマインダー削除を終了する',
+                            data=PostbackActionData.terminate.value,
+                        )
+                    ),
+                ]
+            )
+            try:
+                target_number = int(event.message.text)
+                if target_number <= 0:
+                    raise ValueError('Invalid number. Valid if target_number is greater or equal to 0.')
+                user_reminders_raw = DB_REMINDERS.fetch({'line_user_id': self.user_id}).items
+                user_reminders = parse_obj_as(List[ReminderWithKeyModel], user_reminders_raw)
+                target_user_reminder = user_reminders.pop(target_number - 1)
+                DB_REMINDERS.delete(key=target_user_reminder.key)
+                if user_reminders:
+                    reminder_list_text = '現在クラウドに保存されているリマインダーは↓\n'
+                    reminder_list_text += '\n'.join(f'{number}\n{reminder.datetime} {reminder.content}' for number, reminder in enumerate(user_reminders, 1))
+                else:
+                    reminder_list_text = 'クラウドに保存されているリマインダーはありません。'
+                await self.line_bot_api.reply_message(
+                    event.reply_token,
+                    TextSendMessage(
+                        text=f'「{target_number}\n{target_user_reminder.datetime} {target_user_reminder.content}」を削除しました。\n\n{reminder_list_text}\n\n終了したい場合は以下のボタンを押してください。',
+                        quick_reply=quick_reply,
+                    ),
+                )
+            except (ValueError, IndexError, TypeError):
+                await self.line_bot_api.reply_message(
+                    event.reply_token,
+                    TextSendMessage(
+                        text=f'有効な番号を入力してください。\n\n終了したい場合は以下のボタンを押してください。',
                         quick_reply=quick_reply,
                     ),
                 )
@@ -385,6 +424,11 @@ class EventsHandler:
             await self.line_bot_api.reply_message(
                 event.reply_token,
                 TextSendMessage(text='終了しました。')
+            )
+        elif data == PostbackActionData.inquiry.value:
+            await self.line_bot_api.reply_message(
+                event.reply_token,
+                TextSendMessage(text='作成中です。')
             )
 
     async def handler(self):
