@@ -353,7 +353,7 @@ class EventsHandler:
                     content='',
                     line_user_id=self.user_id,
                 ).dict(),
-                key=str(datetime.timestamp())
+                key=str(datetime.now().timestamp())
             )
             print(6178)
             DB_LINE_ACCOUNTS.update(
