@@ -62,29 +62,38 @@ class EventsHandler:
                     reply,
                 )
         elif user.mode == Mode.memo_post.value:
-            self.db.update(
-                UserModel.construct(
-                    memos=user.memos + [event.message.text]
-                ).dict(),
-                key=user.key,
-            )
-            quick_reply = QuickReply(
-                items=[
-                    QuickReplyButton(
-                        action=PostbackAction(
-                            label='メモ追加を終了する',
-                            data='terminate',
-                        )
+            if event.message.text:
+                self.db.update(
+                    UserModel.construct(
+                        memos=user.memos + [event.message.text]
+                    ).dict(),
+                    key=user.key,
+                )
+                quick_reply = QuickReply(
+                    items=[
+                        QuickReplyButton(
+                            action=PostbackAction(
+                                label='メモ追加を終了する',
+                                data='terminate',
+                            )
+                        ),
+                    ]
+                )
+                await self.line_bot_api.reply_message(
+                    event.reply_token,
+                    TextSendMessage(
+                        text=f'「{event.message.text}」を追加しました。\n終了したい場合は以下のボタンを押してください。',
+                        quick_reply=quick_reply,
                     ),
-                ]
-            )
-            await self.line_bot_api.reply_message(
-                event.reply_token,
-                TextSendMessage(
-                    text=f'「{event.message.text}」を追加しました。\n終了したい場合は以下のボタンを押してください。',
-                    quick_reply=quick_reply,
-                ),
-            )
+                )
+            else:
+                await self.line_bot_api.reply_message(
+                    event.reply_token,
+                    TextSendMessage(
+                        text=f'有効な文を入力してください。\n終了したい場合は以下のボタンを押してください。',
+                        quick_reply=quick_reply,
+                    ),
+                )
         elif user.mode == Mode.memo_deletion.value:
             quick_reply = QuickReply(
                 items=[
@@ -111,13 +120,13 @@ class EventsHandler:
                     memo_list_text = '\n'.join(f'{number}: {value}' for number, value in enumerate(user.memos, 1))
                 else:
                     memo_list_text = 'クラウドに保存されているメモはありません。'
-                    await self.line_bot_api.reply_message(
-                        event.reply_token,
-                        TextSendMessage(
-                            text=f'「{target_number}: {target_memo}」を削除しました。\n{memo_list_text}\n終了したい場合は以下のボタンを押してください。',
-                            quick_reply=quick_reply,
-                        ),
-                    )
+                await self.line_bot_api.reply_message(
+                    event.reply_token,
+                    TextSendMessage(
+                        text=f'「{target_number}: {target_memo}」を削除しました。\n{memo_list_text}\n終了したい場合は以下のボタンを押してください。',
+                        quick_reply=quick_reply,
+                    ),
+                )
             except (ValueError, IndexError):
                 await self.line_bot_api.reply_message(
                     event.reply_token,
