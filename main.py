@@ -70,21 +70,19 @@ async def notify_works(request: Request, bg_tasks: BackgroundTasks):
 
 @app.get('/remind/')
 async def notify_reminders():
-    reminders_raw = DB_REMINDERS.fetch().items
-    reminders = parse_obj_as(List[ReminderWithKeyModel], reminders_raw)
     now = datetime.utcnow().isoformat(timespec='minutes')
+    reminders_raw = DB_REMINDERS.fetch({'datetime': now}).items
+    reminders = parse_obj_as(List[ReminderWithKeyModel], reminders_raw)
 
-    coroutines = []
-    for reminder in reminders:
-        if reminder.datetime == now:
-            coroutines.append(
-                asyncio.create_task(
-                    LINE_BOT_API.push_message(
-                        reminder.line_user_id,
-                        TextSendMessage(reminder.content)
-                    )
-                )
+    coroutines = [
+        asyncio.create_task(
+            LINE_BOT_API.push_message(
+                reminder.line_user_id,
+                TextSendMessage(reminder.content)
             )
+        )
+        for reminder in reminders
+    ]
     await asyncio.gather(*coroutines)
     return 'OK'
 
