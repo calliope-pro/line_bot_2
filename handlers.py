@@ -157,6 +157,13 @@ class EventsHandler:
                     text='メモしたいことを入力してください',
                 )
             )
+        elif data == Mode.memo_deletion.value:
+            await self.line_bot_api.reply_message(
+                event.reply_token,
+                TextSendMessage(
+                    text='削除したいメモの番号を入力してください',
+                )
+            )
         elif data == 'reminder':
             await self.line_bot_api.reply_message(
                 event.reply_token,
