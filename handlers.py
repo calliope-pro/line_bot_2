@@ -68,9 +68,21 @@ class EventsHandler:
                 ).dict(),
                 key=user.key,
             )
+            quick_reply = QuickReply(
+                items=[
+                    QuickReplyButton(
+                        action=PostbackAction(
+                            label='メモ追加を終了する',
+                            data='terminate',
+                        )
+                    ),
+                ]
+            )
             await self.line_bot_api.reply_message(
                 event.reply_token,
-                TextSendMessage(text=f'「{event.message.text}」を追加しました')
+                TextSendMessage(
+                    text=f'「{event.message.text}」を追加しました'),
+                    quick_reply=quick_reply,
             )
 
     async def handle_follow_event(self, event: FollowEvent):
@@ -85,9 +97,7 @@ class EventsHandler:
 
         await self.line_bot_api.reply_message(
             event.reply_token,
-            [
-                TextSendMessage(text=f'Welcome!'),
-            ]
+            TextSendMessage(text=f'Welcome!'),
         )
     
     async def handle_postback_event(self, event: PostbackEvent):
@@ -123,7 +133,6 @@ class EventsHandler:
                 )
             )
         elif data == Mode.memo_post.value:
-            print(23)
             self.db.update(
                 UserModel.construct(
                     mode=Mode.memo_post.value).dict(),
@@ -151,6 +160,16 @@ class EventsHandler:
 ②メモ一覧, 追加, 削除がリッチメニューを通して操作できます。(作成中)
 ③時間を設定しリマインダーを登録することができます。(作成中)'''
                 )
+            )
+        elif data == 'terminate':
+            self.db.update(
+                UserModel.construct(
+                    mode=Mode.normal.value).dict(),
+                key=self.user_id
+            )
+            await self.line_bot_api.reply_message(
+                event.reply_token,
+                TextSendMessage(text='終了しました')
             )
 
     async def handler(self):
