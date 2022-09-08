@@ -72,17 +72,18 @@ class EventsHandler:
                     ),
                 ]
             )
-            if event.message.text:
+            target_text = event.message.text.strip()
+            if target_text:
                 self.db.update(
                     UserModel.construct(
-                        memos=user.memos + [event.message.text.strip()]
+                        memos=user.memos + [target_text]
                     ).dict(),
                     key=user.key,
                 )
                 await self.line_bot_api.reply_message(
                     event.reply_token,
                     TextSendMessage(
-                        text=f'「{event.message.text}」を追加しました。\n終了したい場合は以下のボタンを押してください。',
+                        text=f'「{target_text}」を追加しました。\n終了したい場合は以下のボタンを押してください。',
                         quick_reply=quick_reply,
                     ),
                 )
