@@ -330,8 +330,11 @@ class EventsHandler:
                 )
             )
         elif data == PostbackActionData.reminder_list.value:
+            print(123456)
             user_reminders_raw = DB_REMINDERS.fetch({'line_user_id': self.user_id})
+            print(user_reminders_raw)
             user_reminders = parse_obj_as(List[ReminderWithKeyModel], user_reminders_raw)
+            print(user_reminders)
             if user_reminders:
                 reminder_list_text = '現在クラウドに保存されているリマインダーは↓\n'
                 reminder_list_text += '\n'.join(f'{number}:\n{reminder.datetime} {reminder.content}' for number, reminder in enumerate(user_reminders, 1))
