@@ -81,7 +81,7 @@ class EventsHandler:
             await self.line_bot_api.reply_message(
                 event.reply_token,
                 TextSendMessage(
-                    text=f'「{event.message.text}」を追加しました',
+                    text=f'「{event.message.text}」を追加しました。\n終了したい場合は以下のボタンを押してください。',
                     quick_reply=quick_reply,
                 ),
             )
@@ -133,6 +133,18 @@ class EventsHandler:
                     quick_reply=quick_reply,
                 )
             )
+        elif data == 'memo_list':
+            user = UserWithKeyModel.parse_obj(self.db.get(self.user_id))
+            if user.memos:
+                text = '\n'.join(f'{idx}: {value}' for idx, value in enumerate(user.memos, 1))
+            else:
+                text = 'クラウドに保存されているメモはありません。'
+            await self.line_bot_api.reply_message(
+                event.reply_token,
+                TextSendMessage(
+                    text=text,
+                )
+            )
         elif data == Mode.memo_post.value:
             self.db.update(
                 UserModel.construct(
@@ -170,7 +182,7 @@ class EventsHandler:
             )
             await self.line_bot_api.reply_message(
                 event.reply_token,
-                TextSendMessage(text='終了しました')
+                TextSendMessage(text='終了しました。')
             )
 
     async def handler(self):
