@@ -70,9 +70,13 @@ async def notify_works(request: Request, bg_tasks: BackgroundTasks):
 
 @app.get('/remind/')
 async def notify_reminders():
+    print(123)
     reminders_raw = DB_REMINDERS.fetch().items
+    print(reminders_raw)
     reminders = parse_obj_as(List[ReminderWithKeyModel], reminders_raw)
+    print(reminders)
     now = datetime.utcnow().isoformat(timespec='minutes')
+    print(now)
 
     coroutines = []
     for reminder in reminders:
