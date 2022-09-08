@@ -23,13 +23,9 @@ raw_rich_menu = RichMenu(
                 width=750,
                 height=508,
             ),
-            action=MessageAction(
+            action=PostbackAction(
                 label='usage',
-                text='''このcalliope_botは現在大きく3つの機能を有しております。
-①写真を投稿することで自動的にクラウドに保存され、保存先がurlとして取得できます。平常時メッセージを送った際には、クラウドに保存されている全ての画像のurlを取得できます。
-②メモ一覧, 追加, 削除がリッチメニューを通して操作できます。(作成中)
-③時間を設定しリマインダーを登録することができます。(作成中)
-'''
+                data='usage',
             )
         ),
         RichMenuArea(
@@ -74,7 +70,7 @@ raw_rich_menu = RichMenu(
 
 rich_menu_id = LINE_BOT_API.create_rich_menu(raw_rich_menu)
 
-with open('LINE_rich_menu_design_template/richmenu_1662508136482.jpg', 'rb') as f:
+with open('rich_menu/richmenu.jpg', 'rb') as f:
     LINE_BOT_API.set_rich_menu_image(rich_menu_id, 'image/png', f)
 
 LINE_BOT_API.set_default_rich_menu(rich_menu_id)
