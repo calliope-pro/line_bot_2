@@ -14,7 +14,6 @@ def notify_reminders(event):
     try:
         now = datetime.now(JST).replace(tzinfo=None)
         if now.minute == 0 and now.hour % 4 == 2:
-            pass
             requests.get(f'{BASE_PROJECT_URL}/notify/')
     except Exception as e:
         print(e)
