@@ -1,7 +1,10 @@
 import os
-from linebot.models.actions import MessageAction, DatetimePickerAction, PostbackAction
+
+from linebot.models.actions import PostbackAction, PostbackAction
 from linebot.models.rich_menu import RichMenu, RichMenuSize, RichMenuArea, RichMenuBounds
 from linebot import LineBotApi
+
+from settings import PostbackActionData
 
 BASE_PROJECT_URL = 'https://calliope-bot.deta.dev'
 
@@ -25,7 +28,7 @@ raw_rich_menu = RichMenu(
             ),
             action=PostbackAction(
                 label='usage',
-                data='usage',
+                data=PostbackActionData.usage.value,
             )
         ),
         RichMenuArea(
@@ -36,8 +39,8 @@ raw_rich_menu = RichMenu(
                 height=508,
             ),
             action=PostbackAction(
-                label='handle memo',
-                data='memo',
+                label='handle memos',
+                data=PostbackActionData.memo.value,
             )
         ),
         RichMenuArea(
@@ -47,10 +50,9 @@ raw_rich_menu = RichMenu(
                 width=750,
                 height=508,
             ),
-            action=DatetimePickerAction(
-                label='set reminder time',
-                data='reminder',
-                mode='datetime',
+            action=PostbackAction(
+                label='handle reminders',
+                data=PostbackActionData.reminder.value,
             )
         ),
         RichMenuArea(
@@ -60,9 +62,9 @@ raw_rich_menu = RichMenu(
                 width=750,
                 height=508,
             ),
-            action=MessageAction(
+            action=PostbackAction(
                 label='inquiry',
-                text='お問い合わせ'
+                data=PostbackActionData.inquiry.value,
             )
         ),
     ]
@@ -70,7 +72,9 @@ raw_rich_menu = RichMenu(
 
 rich_menu_id = LINE_BOT_API.create_rich_menu(raw_rich_menu)
 
-with open('rich_menu/richmenu.jpg', 'rb') as f:
+with open('rich_menu_img/richmenu.jpg', 'rb') as f:
     LINE_BOT_API.set_rich_menu_image(rich_menu_id, 'image/png', f)
 
 LINE_BOT_API.set_default_rich_menu(rich_menu_id)
+
+print('fin.')

@@ -1,37 +1,38 @@
 import os
+from datetime import datetime, timedelta
 from typing import List
 from uuid import uuid4
 
 from cryptocode import decrypt, encrypt
-from deta import _Base, _Drive
+from deta import _Drive
 from linebot import AsyncLineBotApi
-from linebot.models.actions import PostbackAction
+from linebot.models.actions import PostbackAction, DatetimePickerAction
 from linebot.models.events import Event, MessageEvent, FollowEvent, PostbackEvent
 from linebot.models.send_messages import TextSendMessage, QuickReply, QuickReplyButton
-from models import UserModel, UserWithKeyModel
 
-from settings import BASE_PROJECT_URL, IS_MAINTENANCE, Mode
+from models import ReminderModel, ReminderWithKeyModel, UserModel, UserWithKeyModel
+from pydantic import parse_obj_as
+from settings import BASE_PROJECT_URL, DB_LINE_ACCOUNTS, DB_REMINDERS, IS_MAINTENANCE, JST, PostbackActionData
 
 class EventsHandler:
-    def __init__(self, line_bot_api: AsyncLineBotApi, events: List[Event], db: _Base, drive: _Drive):
+    def __init__(self, line_bot_api: AsyncLineBotApi, events: List[Event], drive: _Drive):
         self.line_bot_api = line_bot_api
         self.events = events
-        self.db = db
         self.drive = drive
         self.user_id = None
 
     async def handle_message_event(self, event: MessageEvent):
-        user = UserWithKeyModel.parse_obj(self.db.get(self.user_id))
-        if user.mode == Mode.normal.value:
+        user = UserWithKeyModel.parse_obj(DB_LINE_ACCOUNTS.get(self.user_id))
+        if user.mode == PostbackActionData.normal.value:
             if event.message.type == 'image':
-                data = await self.line_bot_api.get_message_content(event.message.id)
+                stream_data = await self.line_bot_api.get_message_content(event.message.id)
                 binary_data = b''
-                async for b in data.iter_content():
+                async for b in stream_data.iter_content():
                     binary_data += b
                 file_name = self.drive.put(
                     name=f'{self.user_id}/{event.message.id}.jpeg',
                     data=binary_data,
-                    content_type=data.content_type,
+                    content_type=stream_data.content_type,
                 )
                 await self.line_bot_api.reply_message(
                     event.reply_token,
@@ -61,20 +62,20 @@ class EventsHandler:
                     event.reply_token,
                     reply,
                 )
-        elif user.mode == Mode.memo_post.value:
+        elif user.mode == PostbackActionData.memo_post.value:
             quick_reply = QuickReply(
                 items=[
                     QuickReplyButton(
                         action=PostbackAction(
                             label='メモ追加を終了する',
-                            data='terminate',
+                            data=PostbackActionData.terminate.value,
                         )
                     ),
                 ]
             )
             target_text = event.message.text.strip()
             if target_text:
-                self.db.update(
+                DB_LINE_ACCOUNTS.update(
                     UserModel.construct(
                         memos=user.memos + [target_text]
                     ).dict(),
@@ -95,13 +96,13 @@ class EventsHandler:
                         quick_reply=quick_reply,
                     ),
                 )
-        elif user.mode == Mode.memo_deletion.value:
+        elif user.mode == PostbackActionData.memo_deletion.value:
             quick_reply = QuickReply(
                 items=[
                     QuickReplyButton(
                         action=PostbackAction(
                             label='メモ削除を終了する',
-                            data='terminate',
+                            data=PostbackActionData.terminate.value,
                         )
                     ),
                 ]
@@ -111,10 +112,8 @@ class EventsHandler:
                 if target_number <= 0:
                     raise ValueError('Invalid number. Valid if target_number is greater or equal to 0.')
                 target_memo = user.memos.pop(target_number - 1)
-                self.db.update(
-                    UserModel.construct(
-                        memos=user.memos
-                    ).dict(),
+                DB_LINE_ACCOUNTS.update(
+                    user.dict(include={'memos'}),
                     key=user.key,
                 )
                 if user.memos:
@@ -137,12 +136,97 @@ class EventsHandler:
                         quick_reply=quick_reply,
                     ),
                 )
+        elif user.mode == PostbackActionData.reminder_post_content.value:
+            quick_reply = QuickReply(
+                items=[
+                    QuickReplyButton(
+                        action=PostbackAction(
+                            label='リマインダー追加を終了する',
+                            data=PostbackActionData.terminate.value,
+                        )
+                    ),
+                ]
+            )
+            target_text = event.message.text.strip()
+            if target_text:
+                user_reminder = ReminderWithKeyModel.parse_obj(DB_REMINDERS.fetch({'line_user_id': self.user_id}).items[-1])
+                if user_reminder.content:
+                    await self.line_bot_api.reply_message(
+                        event.reply_token,
+                        TextSendMessage(
+                            text=f'日時が選択されていません。\n\n終了したい場合は以下のボタンを押してください。',
+                            quick_reply=quick_reply,
+                        ),
+                    )
+                else:
+                    user_reminder.content = target_text
+                    DB_REMINDERS.update(
+                        user_reminder.dict(include={'content'}),
+                        key=user_reminder.key,
+                    )
+                    await self.line_bot_api.reply_message(
+                        event.reply_token,
+                        TextSendMessage(
+                            text=f'「{(datetime.fromisoformat(user_reminder.datetime) + timedelta(hours=9)).strftime("%Y/%m/%d %H:%M")}\n{target_text}」を追加しました。\n\n終了したい場合は以下のボタンを押してください。',
+                            quick_reply=quick_reply,
+                        ),
+                    )
+            else:
+                await self.line_bot_api.reply_message(
+                    event.reply_token,
+                    TextSendMessage(
+                        text=f'有効な文を入力してください。\n\n終了したい場合は以下のボタンを押してください。',
+                        quick_reply=quick_reply,
+                    ),
+                )
+        elif user.mode == PostbackActionData.reminder_deletion.value:
+            quick_reply = QuickReply(
+                items=[
+                    QuickReplyButton(
+                        action=PostbackAction(
+                            label='リマインダー削除を終了する',
+                            data=PostbackActionData.terminate.value,
+                        )
+                    ),
+                ]
+            )
+            try:
+                target_number = int(event.message.text)
+                if target_number <= 0:
+                    raise ValueError('Invalid number. Valid if target_number is greater or equal to 0.')
+                user_reminders_raw = DB_REMINDERS.fetch({'line_user_id': self.user_id}).items
+                user_reminders = parse_obj_as(List[ReminderWithKeyModel], user_reminders_raw)
+                target_user_reminder = user_reminders.pop(target_number - 1)
+                DB_REMINDERS.delete(key=target_user_reminder.key)
+                if user_reminders:
+                    reminder_list_text = '現在クラウドに保存されているリマインダーは↓\n'
+                    reminder_list_text += '\n'.join(
+                        f'{number}\n{(datetime.fromisoformat(reminder.datetime) + timedelta(hours=9)).strftime("%Y/%m/%d %H:%M")} {reminder.content}'
+                            for number, reminder in enumerate(user_reminders, 1)
+                    )
+                else:
+                    reminder_list_text = 'クラウドに保存されているリマインダーはありません。'
+                await self.line_bot_api.reply_message(
+                    event.reply_token,
+                    TextSendMessage(
+                        text=f'「{target_number}\n{(datetime.fromisoformat(target_user_reminder.datetime) + timedelta(hours=9)).strftime("%Y/%m/%d %H:%M")} {target_user_reminder.content}」を削除しました。\n\n{reminder_list_text}\n\n終了したい場合は以下のボタンを押してください。',
+                        quick_reply=quick_reply,
+                    ),
+                )
+            except (ValueError, IndexError, TypeError):
+                await self.line_bot_api.reply_message(
+                    event.reply_token,
+                    TextSendMessage(
+                        text=f'有効な番号を入力してください。\n\n終了したい場合は以下のボタンを押してください。',
+                        quick_reply=quick_reply,
+                    ),
+                )
 
     async def handle_follow_event(self, event: FollowEvent):
-        self.db.put(
+        DB_LINE_ACCOUNTS.put(
             UserModel(
                 token=str(uuid4()),
-                mode=Mode.normal.value,
+                mode=PostbackActionData.normal.value,
                 memos=[]
             ).dict(),
             key=self.user_id
@@ -155,25 +239,25 @@ class EventsHandler:
     
     async def handle_postback_event(self, event: PostbackEvent):
         data = event.postback.data
-        if data == 'memo':
+        if data == PostbackActionData.memo.value:
             quick_reply = QuickReply(
                 items=[
                     QuickReplyButton(
                         action=PostbackAction(
                             label='メモ一覧',
-                            data='memo_list',
+                            data=PostbackActionData.memo_list.value,
                         )
                     ),
                     QuickReplyButton(
                         action=PostbackAction(
                             label='メモ追加',
-                            data='memo_post',
+                            data=PostbackActionData.memo_post.value,
                         )
                     ),
                     QuickReplyButton(
                         action=PostbackAction(
                             label='メモ削除',
-                            data='memo_deletion',
+                            data=PostbackActionData.memo_deletion.value,
                         )
                     ),
                 ]
@@ -185,8 +269,8 @@ class EventsHandler:
                     quick_reply=quick_reply,
                 )
             )
-        elif data == 'memo_list':
-            user = UserWithKeyModel.parse_obj(self.db.get(self.user_id))
+        elif data == PostbackActionData.memo_list.value:
+            user = UserWithKeyModel.parse_obj(DB_LINE_ACCOUNTS.get(self.user_id))
             if user.memos:
                 memo_list_text = '現在クラウドに保存されているメモは↓\n'
                 memo_list_text += '\n'.join(f'{number}: {value}' for number, value in enumerate(user.memos, 1))
@@ -198,10 +282,11 @@ class EventsHandler:
                     text=memo_list_text,
                 )
             )
-        elif data == Mode.memo_post.value:
-            self.db.update(
+        elif data == PostbackActionData.memo_post.value:
+            DB_LINE_ACCOUNTS.update(
                 UserModel.construct(
-                    mode=Mode.memo_post.value).dict(),
+                    mode=PostbackActionData.memo_post.value
+                ).dict(),
                 key=self.user_id
             )
             quick_reply = QuickReply(
@@ -209,7 +294,7 @@ class EventsHandler:
                     QuickReplyButton(
                         action=PostbackAction(
                             label='メモ追加を終了する',
-                            data='terminate',
+                            data=PostbackActionData.terminate.value,
                         )
                     ),
                 ]
@@ -221,10 +306,11 @@ class EventsHandler:
                     quick_reply=quick_reply,
                 )
             )
-        elif data == Mode.memo_deletion.value:
-            self.db.update(
+        elif data == PostbackActionData.memo_deletion.value:
+            DB_LINE_ACCOUNTS.update(
                 UserModel.construct(
-                    mode=Mode.memo_deletion.value).dict(),
+                    mode=PostbackActionData.memo_deletion.value
+                ).dict(),
                 key=self.user_id
             )
             quick_reply = QuickReply(
@@ -232,7 +318,7 @@ class EventsHandler:
                     QuickReplyButton(
                         action=PostbackAction(
                             label='メモ削除を終了する',
-                            data='terminate',
+                            data=PostbackActionData.terminate.value,
                         )
                     ),
                 ]
@@ -244,24 +330,105 @@ class EventsHandler:
                     quick_reply=quick_reply,
                 )
             )
-        elif data == 'reminder':
-            try:
-                assert self.user_id == os.environ['MY_LINE_USER_ID'], 'user_idが異なります'
-            except AssertionError as e:
-                print(e)
-                print(f'{event.source.user_id}から発信')
-                await self.line_bot_api.reply_message(
-                    event.reply_token,
-                    TextSendMessage(text="403 Forbidden\nYou have no authority.")
-                )
-
+        elif data == PostbackActionData.reminder.value:
+            now = datetime.now(JST).replace(tzinfo=None)
+            quick_reply = QuickReply(
+                items=[
+                    QuickReplyButton(
+                        action=PostbackAction(
+                            label='リマインダー一覧',
+                            data=PostbackActionData.reminder_list.value,
+                        )
+                    ),
+                    QuickReplyButton(
+                        action=DatetimePickerAction(
+                            label='リマインダー追加',
+                            data=PostbackActionData.reminder_post_content.value,
+                            mode='datetime',
+                            initial=(now + timedelta(minutes=1)).isoformat(timespec='minutes'),
+                            max=(now + timedelta(days=30)).isoformat(timespec='minutes'),
+                            min=(now + timedelta(minutes=1)).isoformat(timespec='minutes'),
+                        )
+                    ),
+                    QuickReplyButton(
+                        action=PostbackAction(
+                            label='リマインダー削除',
+                            data=PostbackActionData.reminder_deletion.value,
+                        )
+                    ),
+                ]
+            )
             await self.line_bot_api.reply_message(
                 event.reply_token,
                 TextSendMessage(
-                    text='どういう用件ですか？',
+                    text='リマインダー機能の何を使いますか？',
+                    quick_reply=quick_reply,
                 )
             )
-        elif data == 'usage':
+        elif data == PostbackActionData.reminder_list.value:
+            user_reminders_raw = DB_REMINDERS.fetch({'line_user_id': self.user_id}).items
+            user_reminders = parse_obj_as(List[ReminderWithKeyModel], user_reminders_raw)
+            if user_reminders:
+                reminder_list_text = '現在クラウドに保存されているリマインダーは↓\n'
+                reminder_list_text += '\n'.join(
+                    f'{number}:\n{(datetime.fromisoformat(reminder.datetime) + timedelta(hours=9)).strftime("%Y/%m/%d %H:%M")} {reminder.content}'
+                        for number, reminder in enumerate(user_reminders, 1)
+                )
+            else:
+                reminder_list_text = 'クラウドに保存されているリマインダーはありません。'
+            await self.line_bot_api.reply_message(
+                event.reply_token,
+                TextSendMessage(
+                    text=reminder_list_text,
+                )
+            )
+        elif data == PostbackActionData.reminder_post_content.value:
+            DB_REMINDERS.put(
+                ReminderModel(
+                    datetime=(datetime.fromisoformat(event.postback.params['datetime']) - timedelta(hours=9)).isoformat(timespec='minutes'),
+                    content='',
+                    line_user_id=self.user_id,
+                ).dict(),
+                expire_at=datetime.fromisoformat(event.postback.params['datetime']) - timedelta(hours=8, minutes=59),
+                key=str(datetime.now().timestamp())
+            )
+            DB_LINE_ACCOUNTS.update(
+                UserModel.construct(
+                    mode=PostbackActionData.reminder_post_content.value
+                ).dict(),
+                key=self.user_id
+            )
+            await self.line_bot_api.reply_message(
+                event.reply_token,
+                TextSendMessage(
+                    text='リマインドしたいことを入力してください。',
+                )
+            )
+        elif data == PostbackActionData.reminder_deletion.value:
+            DB_LINE_ACCOUNTS.update(
+                UserModel.construct(
+                    mode=PostbackActionData.reminder_deletion.value
+                ).dict(),
+                key=self.user_id
+            )
+            quick_reply = QuickReply(
+                items=[
+                    QuickReplyButton(
+                        action=PostbackAction(
+                            label='リマインダー削除を終了する',
+                            data=PostbackActionData.terminate.value,
+                        )
+                    ),
+                ]
+            )
+            await self.line_bot_api.reply_message(
+                event.reply_token,
+                TextSendMessage(
+                    text='削除したいリマインダーの番号を入力してください。\n\n終了したい場合は以下のボタンを押してください。',
+                    quick_reply=quick_reply,
+                )
+            )
+        elif data == PostbackActionData.usage.value:
             await self.line_bot_api.reply_message(
                 event.reply_token,
                 TextSendMessage(
@@ -271,15 +438,20 @@ class EventsHandler:
 ③時間を設定しリマインダーを登録することができます。(作成中)'''
                 )
             )
-        elif data == 'terminate':
-            self.db.update(
+        elif data == PostbackActionData.terminate.value:
+            DB_LINE_ACCOUNTS.update(
                 UserModel.construct(
-                    mode=Mode.normal.value).dict(),
+                    mode=PostbackActionData.normal.value).dict(),
                 key=self.user_id
             )
             await self.line_bot_api.reply_message(
                 event.reply_token,
                 TextSendMessage(text='終了しました。')
+            )
+        elif data == PostbackActionData.inquiry.value:
+            await self.line_bot_api.reply_message(
+                event.reply_token,
+                TextSendMessage(text='作成中です。')
             )
 
     async def handler(self):

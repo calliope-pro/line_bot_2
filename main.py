@@ -6,12 +6,14 @@ from fastapi import BackgroundTasks, Request, responses, HTTPException
 from linebot.exceptions import InvalidSignatureError
 from linebot.models.events import Event
 from linebot.models.send_messages import TextSendMessage
+from pydantic import parse_obj_as
 
 from handlers import EventsHandler
-from models import PushContentModel
+from models import PushContentModel, ReminderWithKeyModel
 from scrape_sites import scrape_atcoder, scrape_lancers, get_text_lancers, get_text_atcoder
 from settings import (
     DB_LINE_ACCOUNTS,
+    DB_REMINDERS,
     DB_SCRAPE_RESULTS,
     DRIVE_LINE_BOT_DRIVE,
     LINE_BOT_API,
@@ -31,14 +33,14 @@ async def handle_line_request(request: Request, bg_tasks: BackgroundTasks):
     except InvalidSignatureError:
         return HTTPException(400, 'Invalid signature.')
 
-    event_handler = EventsHandler(LINE_BOT_API, events, DB_LINE_ACCOUNTS, DRIVE_LINE_BOT_DRIVE)
+    event_handler = EventsHandler(LINE_BOT_API, events, DRIVE_LINE_BOT_DRIVE)
     bg_tasks.add_task(event_handler.handler)
 
     return 'ok'
 
 
 @app.get('/notify/')
-async def notify(request: Request, bg_tasks: BackgroundTasks):
+async def notify_works(request: Request, bg_tasks: BackgroundTasks):
     messages_list = []
     
     results = await asyncio.gather(
@@ -65,7 +67,26 @@ async def notify(request: Request, bg_tasks: BackgroundTasks):
         os.environ['MY_LINE_USER_ID'],
         messages_list if messages_list else TextSendMessage(text='更新無し'),
     )
-    return 'ok'
+    return 'OK'
+
+
+@app.get('/remind/')
+async def notify_reminders():
+    now = datetime.utcnow().isoformat(timespec='minutes')
+    reminders_raw = DB_REMINDERS.fetch({'datetime': now}).items
+    reminders = parse_obj_as(List[ReminderWithKeyModel], reminders_raw)
+
+    coroutines = [
+        asyncio.create_task(
+            LINE_BOT_API.push_message(
+                reminder.line_user_id,
+                TextSendMessage(reminder.content)
+            )
+        )
+            for reminder in reminders
+    ]
+    await asyncio.gather(*coroutines)
+    return 'OK'
 
 @app.get('/images/{file_name}')
 async def show_image(file_name: str, token: str):

@@ -19,4 +19,4 @@ cryptocode = "*"
 python_version = "3.8"
 
 [scripts]
-richmenu = 'python rich_menu/create_rich_menu.py'
+richmenu = 'python create_rich_menu.py'
