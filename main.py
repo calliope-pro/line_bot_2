@@ -6,12 +6,14 @@ from fastapi import BackgroundTasks, Request, responses, HTTPException
 from linebot.exceptions import InvalidSignatureError
 from linebot.models.events import Event
 from linebot.models.send_messages import TextSendMessage
+from pydantic import parse_obj_as
 
 from handlers import EventsHandler
-from models import PushContentModel
+from models import PushContentModel, ReminderWithKeyModel
 from scrape_sites import scrape_atcoder, scrape_lancers, get_text_lancers, get_text_atcoder
 from settings import (
     DB_LINE_ACCOUNTS,
+    DB_REMINDERS,
     DB_SCRAPE_RESULTS,
     DRIVE_LINE_BOT_DRIVE,
     LINE_BOT_API,
