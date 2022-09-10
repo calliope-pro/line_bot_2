@@ -14,9 +14,17 @@ line-bot-sdk = "*"
 cryptocode = "*"
 
 [dev-packages]
+black = "*"
+isort = "*"
+flake8 = "*"
 
 [requires]
 python_version = "3.8"
 
 [scripts]
 richmenu = 'python create_rich_menu.py'
+fmt-black = 'black --experimental-string-processing .'
+fmt-isort = 'isort . --profile black'
+lint-flake8 = 'flake8 .'
+lint-black = 'black --diff --check .'
+lint-isort = 'isort --check --diff . --profile black'

@@ -1,0 +1,21 @@
+name: Linter with flake8, black, and isort
+
+on:
+  push:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Python, pipenv and Pipfile packages
+        uses: palewire/install-python-pipenv-pipfile@v2
+        with:
+          python-version: 3.8
+
+      - name: Run linting
+        run: |
+          pipenv run lint-flake8
+          pipenv run lint-black
+          pipenv run lint-isort
