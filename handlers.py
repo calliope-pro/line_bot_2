@@ -3,11 +3,10 @@ from datetime import datetime, timedelta
 from typing import List
 from uuid import uuid4
 
-from cryptocode import decrypt, encrypt
 from deta import _Drive
 from linebot import AsyncLineBotApi
 from linebot.models.actions import PostbackAction, DatetimePickerAction
-from linebot.models.events import Event, MessageEvent, FollowEvent, PostbackEvent
+from linebot.models.events import Event, MessageEvent, FollowEvent, PostbackEvent, UnfollowEvent
 from linebot.models.send_messages import TextSendMessage, QuickReply, QuickReplyButton
 
 from models import ReminderModel, ReminderWithKeyModel, UserModel, UserWithKeyModel
@@ -234,9 +233,17 @@ class EventsHandler:
 
         await self.line_bot_api.reply_message(
             event.reply_token,
-            TextSendMessage(text=f'Welcome!'),
+            TextSendMessage(text='Welcome!'),
         )
-    
+
+    async def handle_unfollow_event(self, event: UnfollowEvent):
+        DB_LINE_ACCOUNTS.delete(self.user_id)
+        reminders = parse_obj_as(List[ReminderWithKeyModel], DB_REMINDERS.fetch(ReminderModel.construct(line_user_id=self.user_id).dict(include={'line_user_id'})).items)
+        map(lambda reminder: DB_REMINDERS.delete(reminder.key), reminders)
+        DB_REMINDERS.delete(self.user_id)
+        image_file_paths: List[str] = self.drive.list(prefix=self.user_id)["names"]
+        self.drive.delete_many(image_file_paths)
+
     async def handle_postback_event(self, event: PostbackEvent):
         data = event.postback.data
         if data == PostbackActionData.memo.value:
@@ -482,5 +489,9 @@ class EventsHandler:
             # 友達追加イベント
             elif isinstance(event, FollowEvent):
                 await self.handle_follow_event(event)
+                break
+            # 友達解除イベント
+            elif isinstance(event, UnfollowEvent):
+                await self.handle_unfollow_event(event)
                 break
 
