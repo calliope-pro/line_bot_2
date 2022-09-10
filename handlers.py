@@ -231,7 +231,7 @@ class EventsHandler:
             key=self.user_id
         )
 
-        self.line_bot_api.reply_message(
+        await self.line_bot_api.reply_message(
             event.reply_token,
             TextSendMessage(text='Welcome!'),
         )
@@ -243,6 +243,10 @@ class EventsHandler:
         DB_REMINDERS.delete(self.user_id)
         image_file_paths: List[str] = self.drive.list(prefix=self.user_id)["names"]
         self.drive.delete_many(image_file_paths)
+        await self.line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text='削除しました'),
+        )
 
     async def handle_postback_event(self, event: PostbackEvent):
         data = event.postback.data
