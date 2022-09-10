@@ -249,7 +249,7 @@ class PostbackEventHandlerMixin(EventHandlerMixinBase):
         elif data == PostbackActionData.reminder.value:
             await self._handle_reminder(event)
         elif data == PostbackActionData.reminder_list.value:
-            await self._handle_reminder_list()
+            await self._handle_reminder_list(event)
         elif data == PostbackActionData.reminder_post_content.value:
             await self._handle_reminder_post_content(event)
         elif data == PostbackActionData.reminder_deletion.value:
