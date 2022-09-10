@@ -11,7 +11,7 @@ from config.settings import BASE_PROJECT_URL, DB_LINE_ACCOUNTS, DB_REMINDERS, Po
 from models import ReminderWithKeyModel, UserModel, UserWithKeyModel
 
 class MessageEventHandlerMixin(EventHandlerMixinBase):
-    async def _handle_normal_mode(self, event: MessageEvent):
+    async def _handle_normal_mode(self, event: MessageEvent, user: UserWithKeyModel):
         if event.message.type == 'image':
             stream_data = await self.line_bot_api.get_message_content(event.message.id)
             binary_data = b''
@@ -217,7 +217,7 @@ class MessageEventHandlerMixin(EventHandlerMixinBase):
     async def handle_message_event(self, event: MessageEvent):
         user = UserWithKeyModel.parse_obj(DB_LINE_ACCOUNTS.get(self.user_id))
         if user.mode == PostbackActionData.normal.value:
-            await self._handle_normal_mode(event)
+            await self._handle_normal_mode(event, user)
         elif user.mode == PostbackActionData.memo_post.value:
             await self._handle_memo_post_mode(event, user)
         elif user.mode == PostbackActionData.memo_deletion.value:
