@@ -1,4 +1,4 @@
-name: Linter
+name: Linter with flake8, black, and isort
 
 on:
   push:
