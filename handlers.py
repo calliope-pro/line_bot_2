@@ -1,6 +1,6 @@
 import os
 from datetime import datetime, timedelta
-from typing import List
+from typing import List, Optional
 from uuid import uuid4
 
 from deta import _Drive
@@ -13,7 +13,30 @@ from models import ReminderModel, ReminderWithKeyModel, UserModel, UserWithKeyMo
 from pydantic import parse_obj_as
 from settings import BASE_PROJECT_URL, DB_LINE_ACCOUNTS, DB_REMINDERS, IS_MAINTENANCE, JST, PostbackActionData
 
-class EventsHandler:
+class FollowEventHandlerMixin:
+    line_bot_api: AsyncLineBotApi
+    drive: _Drive
+    user_id: str
+    async def handle_follow_event(self, event: FollowEvent):
+        DB_LINE_ACCOUNTS.put(
+            UserModel(
+                token=str(uuid4()),
+                mode=PostbackActionData.normal.value,
+                memos=[]
+            ).dict(),
+            key=self.user_id
+        )
+
+        await self.line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text='Welcome!'),
+        )
+
+class EventsHandler(FollowEventHandlerMixin):
+    line_bot_api: AsyncLineBotApi
+    events: List[Event]
+    drive: _Drive
+    user_id: Optional[str]
     def __init__(self, line_bot_api: AsyncLineBotApi, events: List[Event], drive: _Drive):
         self.line_bot_api = line_bot_api
         self.events = events
@@ -220,21 +243,6 @@ class EventsHandler:
                         quick_reply=quick_reply,
                     ),
                 )
-
-    async def handle_follow_event(self, event: FollowEvent):
-        DB_LINE_ACCOUNTS.put(
-            UserModel(
-                token=str(uuid4()),
-                mode=PostbackActionData.normal.value,
-                memos=[]
-            ).dict(),
-            key=self.user_id
-        )
-
-        await self.line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage(text='Welcome!'),
-        )
 
     async def handle_unfollow_event(self, event: UnfollowEvent):
         DB_LINE_ACCOUNTS.delete(self.user_id)
