@@ -11,7 +11,7 @@ from linebot.models.send_messages import TextSendMessage, QuickReply, QuickReply
 
 from models import ReminderModel, ReminderWithKeyModel, UserModel, UserWithKeyModel
 from pydantic import parse_obj_as
-from settings import BASE_PROJECT_URL, DB_LINE_ACCOUNTS, DB_REMINDERS, IS_MAINTENANCE, JST, PostbackActionData
+from config.settings import BASE_PROJECT_URL, DB_LINE_ACCOUNTS, DB_REMINDERS, IS_MAINTENANCE, JST, PostbackActionData
 
 class EventsHandler:
     def __init__(self, line_bot_api: AsyncLineBotApi, events: List[Event], drive: _Drive):

@@ -11,7 +11,7 @@ from pydantic import parse_obj_as
 from handlers import EventsHandler
 from models import PushContentModel, ReminderWithKeyModel
 from scrape_sites import scrape_atcoder, scrape_lancers, get_text_lancers, get_text_atcoder
-from settings import (
+from config.settings import (
     DB_LINE_ACCOUNTS,
     DB_REMINDERS,
     DB_SCRAPE_RESULTS,

@@ -2,13 +2,12 @@ from datetime import timedelta, timezone
 from enum import Enum
 import os
 
-from deta import Deta
+from deta import App, Deta
 from aiohttp import ClientSession
 from fastapi import FastAPI
 from linebot import AsyncLineBotApi, WebhookParser
 from linebot.aiohttp_async_http_client import AiohttpAsyncHttpClient
 
-from deta import App
 app = App(FastAPI())
 
 BASE_PROJECT_URL = 'https://calliope-bot.deta.dev'
