@@ -231,7 +231,7 @@ class EventsHandler:
             key=self.user_id
         )
 
-        await self.line_bot_api.reply_message(
+        self.line_bot_api.reply_message(
             event.reply_token,
             TextSendMessage(text='Welcome!'),
         )
