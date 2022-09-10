@@ -1,6 +1,6 @@
 import os
 from datetime import datetime, timedelta
-from typing import List
+from typing import List, Optional
 from uuid import uuid4
 
 from deta import _Drive
@@ -13,13 +13,37 @@ from models import ReminderModel, ReminderWithKeyModel, UserModel, UserWithKeyMo
 from pydantic import parse_obj_as
 from config.settings import BASE_PROJECT_URL, DB_LINE_ACCOUNTS, DB_REMINDERS, IS_MAINTENANCE, JST, PostbackActionData
 
-class EventsHandler:
-    def __init__(self, line_bot_api: AsyncLineBotApi, events: List[Event], drive: _Drive):
-        self.line_bot_api = line_bot_api
-        self.events = events
-        self.drive = drive
-        self.user_id = None
+class EventHandlerMixinBase:
+    line_bot_api: AsyncLineBotApi
+    drive: _Drive
+    user_id: str
 
+class FollowEventHandlerMixin(EventHandlerMixinBase):
+    async def handle_follow_event(self, event: FollowEvent):
+        DB_LINE_ACCOUNTS.put(
+            UserModel(
+                token=str(uuid4()),
+                mode=PostbackActionData.normal.value,
+                memos=[]
+            ).dict(),
+            key=self.user_id
+        )
+
+        await self.line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text='Welcome!'),
+        )
+
+class UnfollowEventHandlerMixin(EventHandlerMixinBase):
+    async def handle_unfollow_event(self, event: UnfollowEvent):
+        DB_LINE_ACCOUNTS.delete(self.user_id)
+        reminders = parse_obj_as(List[ReminderWithKeyModel], DB_REMINDERS.fetch(ReminderModel.construct(line_user_id=self.user_id).dict(include={'line_user_id'})).items)
+        map(lambda reminder: DB_REMINDERS.delete(reminder.key), reminders)
+        DB_REMINDERS.delete(self.user_id)
+        image_file_paths: List[str] = self.drive.list(prefix=self.user_id)["names"]
+        self.drive.delete_many(image_file_paths)
+
+class MessageEventHandlerMixin(EventHandlerMixinBase):
     async def handle_message_event(self, event: MessageEvent):
         user = UserWithKeyModel.parse_obj(DB_LINE_ACCOUNTS.get(self.user_id))
         if user.mode == PostbackActionData.normal.value:
@@ -221,29 +245,7 @@ class EventsHandler:
                     ),
                 )
 
-    async def handle_follow_event(self, event: FollowEvent):
-        DB_LINE_ACCOUNTS.put(
-            UserModel(
-                token=str(uuid4()),
-                mode=PostbackActionData.normal.value,
-                memos=[]
-            ).dict(),
-            key=self.user_id
-        )
-
-        await self.line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage(text='Welcome!'),
-        )
-
-    async def handle_unfollow_event(self, event: UnfollowEvent):
-        DB_LINE_ACCOUNTS.delete(self.user_id)
-        reminders = parse_obj_as(List[ReminderWithKeyModel], DB_REMINDERS.fetch(ReminderModel.construct(line_user_id=self.user_id).dict(include={'line_user_id'})).items)
-        map(lambda reminder: DB_REMINDERS.delete(reminder.key), reminders)
-        DB_REMINDERS.delete(self.user_id)
-        image_file_paths: List[str] = self.drive.list(prefix=self.user_id)["names"]
-        self.drive.delete_many(image_file_paths)
-
+class PostbackEventHandlerMixin(EventHandlerMixinBase):
     async def handle_postback_event(self, event: PostbackEvent):
         data = event.postback.data
         if data == PostbackActionData.memo.value:
@@ -461,7 +463,23 @@ class EventsHandler:
                 TextSendMessage(text='作成中です。')
             )
 
-    async def handler(self):
+class EventsHandler(
+    FollowEventHandlerMixin,
+    UnfollowEventHandlerMixin,
+    MessageEventHandlerMixin,
+    PostbackEventHandlerMixin,
+):
+    line_bot_api: AsyncLineBotApi
+    events: List[Event]
+    drive: _Drive
+    user_id: Optional[str]
+    def __init__(self, line_bot_api: AsyncLineBotApi, events: List[Event], drive: _Drive):
+        self.line_bot_api = line_bot_api
+        self.events = events
+        self.drive = drive
+        self.user_id = None
+
+    async def handle(self):
         # ベント処理List[Event]
         for event in self.events:
             if IS_MAINTENANCE:

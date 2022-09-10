@@ -34,7 +34,7 @@ async def handle_line_request(request: Request, bg_tasks: BackgroundTasks):
         return HTTPException(400, 'Invalid signature.')
 
     event_handler = EventsHandler(LINE_BOT_API, events, DRIVE_LINE_BOT_DRIVE)
-    bg_tasks.add_task(event_handler.handler)
+    bg_tasks.add_task(event_handler.handle)
 
     return 'ok'
 
