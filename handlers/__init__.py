@@ -19,6 +19,7 @@ class EventsHandler(
     PostbackEventHandlerMixin,
 ):
     events: List[Event]
+    user_id: Optional[str]
 
     def __init__(self, line_bot_api: AsyncLineBotApi, events: List[Event], drive: _Drive):
         self.line_bot_api = line_bot_api
