@@ -2,7 +2,7 @@ from datetime import datetime
 
 import requests
 
-from settings import JST, app, BASE_PROJECT_URL
+from config.settings import JST, app, BASE_PROJECT_URL
 
 @app.lib.cron()
 def notify_reminders(event):

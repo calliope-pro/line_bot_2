@@ -4,7 +4,7 @@ from linebot.models.actions import PostbackAction, PostbackAction
 from linebot.models.rich_menu import RichMenu, RichMenuSize, RichMenuArea, RichMenuBounds
 from linebot import LineBotApi
 
-from settings import PostbackActionData
+from config.settings import PostbackActionData
 
 BASE_PROJECT_URL = 'https://calliope-bot.deta.dev'
 
