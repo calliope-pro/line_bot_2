@@ -11,6 +11,7 @@ lxml = "*"
 requests = "*"
 deta = "*"
 line-bot-sdk = "*"
+aiofiles = "*"
 
 [dev-packages]
 black = "*"
