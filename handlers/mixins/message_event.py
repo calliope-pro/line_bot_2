@@ -297,6 +297,8 @@ class MessageEventHandlerMixin(EventHandlerMixinBase):
                     ),
                 )
 
+            print(stream_data.content_type)
+            print(guess_extension(stream_data.content_type))
             extension = guess_extension(stream_data.content_type)
             self.drive.put(
                 name=f"{self.user_id}/{event.message.id}{extension}",
