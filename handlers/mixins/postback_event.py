@@ -258,7 +258,7 @@ class PostbackEventHandlerMixin(EventHandlerMixinBase):
                 TextSendMessage(
                     text="\n\n".join(
                         map(
-                            lambda x: f'{BASE_PROJECT_URL}/images{x.replace(self.user_id, "", 1)}?token={user.token}',
+                            lambda x: f'{BASE_PROJECT_URL}/storage{x.replace(self.user_id, "", 1)}?token={user.token}',
                             image_file_paths,
                         )
                     )
