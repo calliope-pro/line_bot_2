@@ -106,6 +106,7 @@ def show_file(file_name: str, token: str):
         media_type = mimetypes.guess_type(file_name)[0]
         return responses.FileResponse(str(tmp_path / file_name), media_type=media_type)
     except Exception as e:
+        print(tmp_path)
         print(e)
 
 
