@@ -1,6 +1,7 @@
 import os
 from datetime import timedelta, timezone
 from enum import Enum
+from mimetypes import types_map
 
 from aiohttp import ClientSession
 from deta import Deta
@@ -35,6 +36,9 @@ DRIVE_LINE_BOT_DRIVE = deta.Drive("line-bot-drive")
 IS_MAINTENANCE = bool(int(os.environ["IS_MAINTENANCE"]))
 
 JST = timezone(timedelta(hours=9), "JST")
+
+types_map[".m4a"] = "audio/x-m4a"
+types_map[".mp3"] = "audio/mpeg"
 
 
 class PostbackActionData(Enum):
