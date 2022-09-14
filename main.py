@@ -103,7 +103,7 @@ def show_file(file_name: str, token: str):
     )
     try:
         return responses.StreamingResponse(
-            file.iter_lines(1024 * 1024), media_type=media_type
+            file.read(), media_type=media_type
         )
     except Exception as e:
         print(e)
