@@ -95,6 +95,7 @@ def show_file(file_name: str, token: str):
     user = UserWithKeyModel.parse_obj(DB_LINE_ACCOUNTS.fetch({"token": token}).items[0])
     file = DRIVE_LINE_BOT_DRIVE.get(f"{user.key}/{file_name}")
     media_type = mimetypes.guess_type(f"{file_name}")[0]
+    print(media_type)
     return responses.StreamingResponse(file.iter_chunks(4096), media_type=media_type)
 
 
