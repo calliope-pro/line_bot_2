@@ -102,9 +102,7 @@ def show_file(file_name: str, token: str):
         "storage-data",
     )
     try:
-        return responses.StreamingResponse(
-            file.read(), media_type=media_type
-        )
+        return responses.StreamingResponse(file.read(), media_type=media_type)
     except Exception as e:
         print(e)
 
