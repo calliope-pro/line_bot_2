@@ -1,4 +1,5 @@
 import asyncio
+from io import BytesIO
 import mimetypes
 import os
 from datetime import datetime
@@ -98,7 +99,7 @@ def show_file(file_name: str, token: str):
     media_type = mimetypes.guess_type(file_name)[0]
     print(media_type)
     try:
-        return responses.StreamingResponse(file.iter_chunks(1024**2), media_type=media_type)
+        return responses.StreamingResponse(file.iter_lines(1024**2), media_type=media_type)
     except Exception as e:
         print(e)
 
