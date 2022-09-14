@@ -99,7 +99,7 @@ def show_file(file_name: str, token: str):
     if not tmp_path.exists():
         tmp_path.mkdir()
     with (tmp_path / file_name).open("wb") as f:
-        for chunk in file.iter_chunks(1024 * 1024):
+        for chunk in file.iter_chunks(4096):
             f.write(chunk)
         file.close()
     media_type = mimetypes.guess_type(file_name)[0]
