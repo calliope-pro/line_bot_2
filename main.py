@@ -93,11 +93,11 @@ async def notify_reminders():
 @app.get("/storage/{file_name}")
 async def show_image(file_name: str, token: str):
     user = UserWithKeyModel.parse_obj(DB_LINE_ACCOUNTS.fetch({"token": token}).items[0])
-    image = DRIVE_LINE_BOT_DRIVE.get(f"{user.key}/{file_name}")
+    file = DRIVE_LINE_BOT_DRIVE.get(f"{user.key}/{file_name}")
     print(file_name)
     media_type = mimetypes.guess_type(file_name)[0]
     print(media_type)
-    return responses.StreamingResponse(image.iter_chunks(), media_type=media_type)
+    return responses.StreamingResponse(file.iter_chunks(1024**2), media_type=media_type)
 
 
 @app.post("/push/")
