@@ -2,7 +2,6 @@ import asyncio
 import mimetypes
 import os
 from datetime import datetime
-from pathlib import Path
 from typing import List
 
 from fastapi import BackgroundTasks, HTTPException, Request, responses
@@ -18,7 +17,6 @@ from config.settings import (
     DRIVE_LINE_BOT_DRIVE,
     LINE_BOT_API,
     LINE_PARSER,
-    PROJECT_DIR,
     app,
 )
 from handlers import EventsHandler
@@ -93,18 +91,11 @@ async def notify_reminders():
 
 
 @app.get("/storage/{file_name}")
-async def show_file(file_name: str, token: str):
+def show_file(file_name: str, token: str):
     user = UserWithKeyModel.parse_obj(DB_LINE_ACCOUNTS.fetch({"token": token}).items[0])
     file = DRIVE_LINE_BOT_DRIVE.get(f"{user.key}/{file_name}")
-    tmp_path = PROJECT_DIR / "tmp"
-    if not tmp_path.exists():
-        tmp_path.mkdir(exist_ok=True)
-    with (tmp_path / f'{user.key}-{file_name}').open("wb") as f:
-        async for chunk in file.iter_chunks(4096):
-            f.write(await chunk)
-        file.close()
-    media_type = mimetypes.guess_type(f'{file_name}')[0]
-    return responses.FileResponse(str(tmp_path / f'{user.key}-{file_name}'), media_type=media_type)
+    media_type = mimetypes.guess_type(f"{file_name}")[0]
+    return responses.StreamingResponse(file.iter_chunks(4096), media_type=media_type)
 
 
 @app.post("/push/")
