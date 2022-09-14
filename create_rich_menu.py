@@ -2,6 +2,7 @@ import os
 
 from linebot import LineBotApi
 from linebot.models.actions import PostbackAction, URIAction
+from linebot.models.send_messages import TextSendMessage
 from linebot.models.rich_menu import (
     RichMenu,
     RichMenuArea,
@@ -108,5 +109,10 @@ with open("rich_menu_imgs/richmenu.jpg", "rb") as f:
     LINE_BOT_API.set_rich_menu_image(rich_menu_id, "image/png", f)
 
 LINE_BOT_API.set_default_rich_menu(rich_menu_id)
+
+LINE_BOT_API.push_message(
+    os.environ["MY_LINE_USER_ID"],
+    TextSendMessage(f"richmenu id:{rich_menu_id}\n設定されました"),
+)
 
 print("fin.")
