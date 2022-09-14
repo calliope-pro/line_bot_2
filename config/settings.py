@@ -12,7 +12,7 @@ try:
     from deta import App
     app = App(FastAPI())
 except ImportError:
-    print('Develop mode...')
+    print('Development mode...')
 
 BASE_PROJECT_URL = "https://calliope-bot.deta.dev"
 
