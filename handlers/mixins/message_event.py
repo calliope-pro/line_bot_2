@@ -19,47 +19,13 @@ from .base import EventHandlerMixinBase
 
 class MessageEventHandlerMixin(EventHandlerMixinBase):
     async def _handle_normal_mode(self, event: MessageEvent, user: UserWithKeyModel):
-        if event.message.type == "image":
-            stream_data = await self.line_bot_api.get_message_content(event.message.id)
-            binary_data = b""
-            async for b in stream_data.iter_content():
-                binary_data += b
-            file_name = self.drive.put(
-                name=f"{self.user_id}/{event.message.id}.jpeg",
-                data=binary_data,
-                content_type=stream_data.content_type,
-            )
-            await self.line_bot_api.reply_message(
-                event.reply_token,
-                TextSendMessage(
-                    text=(
-                        f'{BASE_PROJECT_URL}/images{file_name.replace(self.user_id, "", 1)}?token={user.token}\nに保存しました'
-                    )
-                ),
-            )
-        else:
-            reply = [
-                TextSendMessage(text=f"You: {event.message.text}"),
-            ]
-            image_file_paths = self.drive.list(prefix=self.user_id)["names"]
-            if image_file_paths:
-                reply.append(
-                    TextSendMessage(
-                        text="\n\n".join(
-                            map(
-                                lambda x: f'{BASE_PROJECT_URL}/images{x.replace(self.user_id, "", 1)}?token={user.token}',
-                                image_file_paths,
-                            )
-                        )
-                    )
-                )
-            else:
-                reply.append(TextSendMessage(text="クラウドに保存されている画像はありません。"))
-
-            await self.line_bot_api.reply_message(
-                event.reply_token,
-                reply,
-            )
+        reply = [
+            TextSendMessage(text=f"You: {event.message.text}"),
+        ]
+        await self.line_bot_api.reply_message(
+            event.reply_token,
+            reply,
+        )
 
     async def _handle_memo_post_mode(self, event: MessageEvent, user: UserWithKeyModel):
         quick_reply = QuickReply(
@@ -192,7 +158,7 @@ class MessageEventHandlerMixin(EventHandlerMixinBase):
                 ),
             )
 
-    async def _handle_reminder_deletion(self, event: MessageEvent):
+    async def _handle_reminder_deletion_mode(self, event: MessageEvent):
         quick_reply = QuickReply(
             items=[
                 QuickReplyButton(
@@ -243,15 +209,84 @@ class MessageEventHandlerMixin(EventHandlerMixinBase):
                 ),
             )
 
+    async def _handle_file_post_mode(self, event: MessageEvent, user: UserWithKeyModel):
+        quick_reply = QuickReply(
+            items=[
+                QuickReplyButton(
+                    action=PostbackAction(
+                        label="ファイル追加を終了する",
+                        data=PostbackActionData.terminate.value,
+                    )
+                ),
+            ]
+        )
+        if event.message.type != "text":
+            stream_data = await self.line_bot_api.get_message_content(event.message.id)
+            binary_data = b""
+            async for b in stream_data.iter_content():
+                binary_data += b
+            file_name = self.drive.put(
+                name=f"{self.user_id}/{event.message.id}.jpeg",
+                data=binary_data,
+                content_type=stream_data.content_type,
+            )
+            await self.line_bot_api.reply_message(
+                event.reply_token,
+                TextSendMessage(
+                    text=(
+                        f'{BASE_PROJECT_URL}/images{file_name.replace(self.user_id, "", 1)}?token={user.token}\nに保存しました'
+                    )
+                ),
+            )
+        else:
+            await self.line_bot_api.reply_message(
+                event.reply_token,
+                TextSendMessage(
+                    text="有効なファイルを送信してください。\n\n終了したい場合は以下のボタンを押してください。",
+                    quick_reply=quick_reply,
+                ),
+            )
+
+    async def _handle_file_deletion_mode(
+        self, event: MessageEvent, user: UserWithKeyModel
+    ):
+        quick_reply = QuickReply(
+            items=[
+                QuickReplyButton(
+                    action=PostbackAction(
+                        label="ファイル削除を終了する",
+                        data=PostbackActionData.terminate.value,
+                    )
+                ),
+            ]
+        )
+        await self.line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(
+                text="作成中です。\n\n終了したい場合は以下のボタンを押してください。",
+                quick_reply=quick_reply,
+            ),
+        )
+
     async def handle_message_event(self, event: MessageEvent):
         user = UserWithKeyModel.parse_obj(DB_LINE_ACCOUNTS.get(self.user_id))
         if user.mode == PostbackActionData.normal.value:
             await self._handle_normal_mode(event, user)
+
         elif user.mode == PostbackActionData.memo_post.value:
             await self._handle_memo_post_mode(event, user)
+
         elif user.mode == PostbackActionData.memo_deletion.value:
             await self._handle_memo_deletion_mode(event, user)
+
         elif user.mode == PostbackActionData.reminder_post_content.value:
             await self._handle_reminder_post_content_mode(event)
+
         elif user.mode == PostbackActionData.reminder_deletion.value:
-            await self._handle_reminder_deletion(event)
+            await self._handle_reminder_deletion_mode(event)
+
+        elif user.mode == PostbackActionData.file_post.value:
+            await self._handle_file_post_mode(event, user)
+
+        elif user.mode == PostbackActionData.file_deletion.value:
+            await self._handle_file_deletion_mode(event)
