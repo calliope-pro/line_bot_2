@@ -95,17 +95,15 @@ async def notify_reminders():
 def show_file(file_name: str, token: str):
     user = UserWithKeyModel.parse_obj(DB_LINE_ACCOUNTS.fetch({"token": token}).items[0])
     file = DRIVE_LINE_BOT_DRIVE.get(f"{user.key}/{file_name}")
-    # tmp_path = Path(f'tmp/{user.key}')
-    # if not tmp_path.exists():
-    #     tmp_path.mkdir()
-    def iterfile():
-        for chunk in file.iter_chunks(1024*1024):
-            yield chunk
+    tmp_path = Path(f"tmp/{user.key}")
+    if not tmp_path.exists():
+        tmp_path.mkdir()
+    with (tmp_path / file_name).open("wb") as f:
+        for chunk in file.iter_chunks(1024 * 1024):
+            f.write(chunk)
+        file.close()
     media_type = mimetypes.guess_type(file_name)[0]
-    return responses.StreamingResponse(
-        iterfile(), media_type=media_type
-    )
-
+    return responses.FileResponse(tmp_path / file_name, media_type=media_type)
 
 
 @app.post("/push/")
