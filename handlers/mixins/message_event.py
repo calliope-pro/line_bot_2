@@ -297,9 +297,7 @@ class MessageEventHandlerMixin(EventHandlerMixinBase):
                     ),
                 )
 
-            print(stream_data.content_type)
-            extension = guess_extension(stream_data.content_type)[1:]
-            print(extension)
+            extension = guess_extension(stream_data.content_type)[1:] or 'm4a'
             self.drive.put(
                 name=f"{self.user_id}/{event.message.id}.{extension}",
                 data=binary_data,
