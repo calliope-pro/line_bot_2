@@ -97,7 +97,10 @@ async def show_image(file_name: str, token: str):
     print(file_name)
     media_type = mimetypes.guess_type(file_name)[0]
     print(media_type)
-    return responses.StreamingResponse(file.iter_chunks(1024**2), media_type=media_type)
+    try:
+        return responses.StreamingResponse(file.iter_chunks(1024**2), media_type=media_type)
+    except Exception as e:
+        print(e)
 
 
 @app.post("/push/")
