@@ -101,7 +101,7 @@ async def show_file(file_name: str, token: str):
         tmp_path.mkdir(exist_ok=True)
     with (tmp_path / f'{user.key}-{file_name}').open("wb") as f:
         async for chunk in file.iter_chunks(4096):
-            f.write(chunk)
+            f.write(await chunk)
         file.close()
     media_type = mimetypes.guess_type(f'{file_name}')[0]
     return responses.FileResponse(str(tmp_path / f'{user.key}-{file_name}'), media_type=media_type)
