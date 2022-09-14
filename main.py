@@ -2,6 +2,7 @@ import asyncio
 import mimetypes
 import os
 from datetime import datetime
+from pathlib import Path
 from typing import List
 
 from fastapi import BackgroundTasks, HTTPException, Request, responses
@@ -94,19 +95,17 @@ async def notify_reminders():
 def show_file(file_name: str, token: str):
     user = UserWithKeyModel.parse_obj(DB_LINE_ACCOUNTS.fetch({"token": token}).items[0])
     file = DRIVE_LINE_BOT_DRIVE.get(f"{user.key}/{file_name}")
+    # tmp_path = Path(f'tmp/{user.key}')
+    # if not tmp_path.exists():
+    #     tmp_path.mkdir()
+    def iterfile():
+        for chunk in file.iter_chunks(1024*1024):
+            yield chunk
     media_type = mimetypes.guess_type(file_name)[0]
-    DB_SCRAPE_RESULTS.put(
-        {
-            "name": media_type,
-        },
-        "storage-data",
+    return responses.StreamingResponse(
+        iterfile(), media_type=media_type
     )
-    try:
-        return responses.StreamingResponse(
-            file.iter_chunks(1024 * 1024), media_type=media_type
-        )
-    except Exception as e:
-        print(e)
+
 
 
 @app.post("/push/")
