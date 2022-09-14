@@ -1,6 +1,9 @@
 from typing import List, Optional
+from uuid import uuid4
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+
+from config.settings import PostbackActionData
 
 
 class KeyModelMixin(BaseModel):
@@ -23,9 +26,10 @@ class ReminderWithKeyModel(ReminderModel, KeyModelMixin):
 
 
 class UserModel(BaseModel):
-    token: str
-    mode: str
-    memos: List[str]
+    token: str = Field(default_factory=lambda: str(uuid4()))
+    mode: str = PostbackActionData.normal.value
+    memos: List[str] = []
+    storage_capacity: int = 0
 
 
 class UserWithKeyModel(UserModel, KeyModelMixin):
