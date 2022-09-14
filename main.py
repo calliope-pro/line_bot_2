@@ -91,7 +91,7 @@ async def notify_reminders():
 
 
 @app.get("/storage/{file_name}")
-async def show_image(file_name: str, token: str):
+def show_file(file_name: str, token: str):
     user = UserWithKeyModel.parse_obj(DB_LINE_ACCOUNTS.fetch({"token": token}).items[0])
     file = DRIVE_LINE_BOT_DRIVE.get(f"{user.key}/{file_name}")
     print(file_name)
