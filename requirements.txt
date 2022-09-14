@@ -5,4 +5,3 @@ lxml
 requests
 deta[async]==1.1.0a2
 line-bot-sdk==2.3.0
-aiofiles
