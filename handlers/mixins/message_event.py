@@ -299,6 +299,7 @@ class MessageEventHandlerMixin(EventHandlerMixinBase):
                 data=binary_data,
                 content_type=stream_data.content_type,
             )
+            print(stream_data.content_type)
             user.storage_capacity += len(binary_data)
             DB_LINE_ACCOUNTS.update(
                 user.dict(include={"storage_capacity"}), self.user_id
