@@ -103,7 +103,7 @@ def show_file(file_name: str, token: str):
             f.write(chunk)
         file.close()
     media_type = mimetypes.guess_type(file_name)[0]
-    return responses.FileResponse(tmp_path / file_name, media_type=media_type)
+    return responses.FileResponse(str(tmp_path / file_name), media_type=media_type)
 
 
 @app.post("/push/")
