@@ -18,6 +18,7 @@ from config.settings import (
     DRIVE_LINE_BOT_DRIVE,
     LINE_BOT_API,
     LINE_PARSER,
+    PROJECT_DIR,
     app,
 )
 from handlers import EventsHandler
@@ -95,7 +96,7 @@ async def notify_reminders():
 def show_file(file_name: str, token: str):
     user = UserWithKeyModel.parse_obj(DB_LINE_ACCOUNTS.fetch({"token": token}).items[0])
     file = DRIVE_LINE_BOT_DRIVE.get(f"{user.key}/{file_name}")
-    tmp_path = Path('tmp').resolve().parent / user.key
+    tmp_path = PROJECT_DIR.resolve().parent / user.key
     try:
         if not tmp_path.exists():
             tmp_path.mkdir(exist_ok=True)
@@ -107,6 +108,7 @@ def show_file(file_name: str, token: str):
         return responses.FileResponse(str(tmp_path / file_name), media_type=media_type)
     except Exception as e:
         print(tmp_path)
+        print(tmp_path.root)
         print(e)
 
 
