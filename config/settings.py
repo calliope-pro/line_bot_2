@@ -10,9 +10,10 @@ from linebot.aiohttp_async_http_client import AiohttpAsyncHttpClient
 
 try:
     from deta import App
+
     app = App(FastAPI())
 except ImportError:
-    print('Development mode...')
+    print("Development mode...")
 
 BASE_PROJECT_URL = "https://calliope-bot.deta.dev"
 
@@ -38,7 +39,6 @@ JST = timezone(timedelta(hours=9), "JST")
 
 class PostbackActionData(Enum):
     normal = "normal"
-    file = "file"
     memo = "memo"
     memo_list = "memo_list"
     memo_post = "memo_post"
@@ -48,6 +48,10 @@ class PostbackActionData(Enum):
     reminder_post_datetime = "reminder_post_datetime"
     reminder_post_content = "reminder_post_content"
     reminder_deletion = "reminder_deletion"
+    file = "file"
+    file_list = "file_list"
+    file_post = "file_post"
+    file_deletion = "file_deletion"
     usage = "usage"
     inquiry = "inquiry"
     terminate = "terminate"
