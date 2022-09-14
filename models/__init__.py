@@ -26,6 +26,7 @@ class UserModel(BaseModel):
     token: str
     mode: str
     memos: List[str]
+    storage_capacity: int
 
 
 class UserWithKeyModel(UserModel, KeyModelMixin):

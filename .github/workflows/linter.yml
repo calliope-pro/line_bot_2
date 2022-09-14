@@ -1,7 +1,7 @@
 name: Linter with flake8, black, and isort
 
 on:
-  push:
+  pull_request:
 
 jobs:
   build:

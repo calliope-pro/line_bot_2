@@ -1,5 +1,5 @@
-local_settings.py
 Pipfile
 Pipfile.lock
 !.env.sample
-rich_menu_img
+rich_menu_imgs
+setup.cfg

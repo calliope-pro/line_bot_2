@@ -1,14 +1,23 @@
+import mimetypes
 import os
 from datetime import timedelta, timezone
 from enum import Enum
+from pathlib import Path
 
 from aiohttp import ClientSession
-from deta import App, Deta
+from deta import Deta
 from fastapi import FastAPI
 from linebot import AsyncLineBotApi, WebhookParser
 from linebot.aiohttp_async_http_client import AiohttpAsyncHttpClient
 
-app = App(FastAPI())
+try:
+    from deta import App
+
+    app = App(FastAPI())
+except ImportError:
+    print("Development mode...")
+
+PROJECT_DIR = Path().resolve().parent.parent
 
 BASE_PROJECT_URL = "https://calliope-bot.deta.dev"
 
@@ -31,6 +40,9 @@ IS_MAINTENANCE = bool(int(os.environ["IS_MAINTENANCE"]))
 
 JST = timezone(timedelta(hours=9), "JST")
 
+mimetypes.add_type("audio/x-m4a", ".m4a")
+mimetypes.add_type("audio/mpeg", ".mp3")
+
 
 class PostbackActionData(Enum):
     normal = "normal"
@@ -43,6 +55,10 @@ class PostbackActionData(Enum):
     reminder_post_datetime = "reminder_post_datetime"
     reminder_post_content = "reminder_post_content"
     reminder_deletion = "reminder_deletion"
+    file = "file"
+    file_list = "file_list"
+    file_post = "file_post"
+    file_deletion = "file_deletion"
     usage = "usage"
     inquiry = "inquiry"
     terminate = "terminate"

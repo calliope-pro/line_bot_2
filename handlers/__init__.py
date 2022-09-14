@@ -45,12 +45,10 @@ class EventsHandler(
                     assert (
                         event.source.user_id == os.environ["MY_LINE_USER_ID"]
                     ), "user_idが異なります"
-                except AssertionError as e:
-                    print(e)
-                    print(f"{event.source.user_id}から発信")
+                except AssertionError:
                     await self.line_bot_api.reply_message(
                         event.reply_token,
-                        TextSendMessage(text="403 Forbidden\nYou have no authority."),
+                        TextSendMessage(text="Not available due to maintenance."),
                     )
                     break
 

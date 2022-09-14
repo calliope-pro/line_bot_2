@@ -6,7 +6,13 @@ from linebot.models.events import PostbackEvent
 from linebot.models.send_messages import QuickReply, QuickReplyButton, TextSendMessage
 from pydantic import parse_obj_as
 
-from config.settings import DB_LINE_ACCOUNTS, DB_REMINDERS, JST, PostbackActionData
+from config.settings import (
+    BASE_PROJECT_URL,
+    DB_LINE_ACCOUNTS,
+    DB_REMINDERS,
+    JST,
+    PostbackActionData,
+)
 from models import ReminderModel, ReminderWithKeyModel, UserModel, UserWithKeyModel
 
 from .base import EventHandlerMixinBase
@@ -212,14 +218,131 @@ class PostbackEventHandlerMixin(EventHandlerMixinBase):
             ),
         )
 
+    async def _handle_file(self, event: PostbackEvent):
+        quick_reply = QuickReply(
+            items=[
+                QuickReplyButton(
+                    action=PostbackAction(
+                        label="ファイル一覧",
+                        data=PostbackActionData.file_list.value,
+                    )
+                ),
+                QuickReplyButton(
+                    action=PostbackAction(
+                        label="ファイル追加",
+                        data=PostbackActionData.file_post.value,
+                    )
+                ),
+                QuickReplyButton(
+                    action=PostbackAction(
+                        label="ファイル削除",
+                        data=PostbackActionData.file_deletion.value,
+                    )
+                ),
+            ]
+        )
+        await self.line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(
+                text="ファイル機能の何を使いますか？",
+                quick_reply=quick_reply,
+            ),
+        )
+
+    async def _handle_file_list(self, event: PostbackEvent):
+        user = UserWithKeyModel.parse_obj(DB_LINE_ACCOUNTS.get(self.user_id))
+        image_file_paths: List[str] = self.drive.list(prefix=self.user_id)["names"]
+        if image_file_paths:
+            await self.line_bot_api.reply_message(
+                event.reply_token,
+                TextSendMessage(
+                    text="\n\n".join(
+                        map(
+                            lambda x: f'{BASE_PROJECT_URL}/storage{x.replace(self.user_id, "", 1)}?token={user.token}',
+                            image_file_paths,
+                        )
+                    )
+                ),
+            )
+        else:
+            await self.line_bot_api.reply_message(
+                event.reply_token,
+                TextSendMessage(text="クラウドに保存されているファイルはありません。"),
+            )
+
+    async def _handle_file_post(self, event: PostbackEvent):
+        DB_LINE_ACCOUNTS.update(
+            UserModel.construct(mode=PostbackActionData.file_post.value).dict(),
+            key=self.user_id,
+        )
+        quick_reply = QuickReply(
+            items=[
+                QuickReplyButton(
+                    action=PostbackAction(
+                        label="ファイル追加を終了する",
+                        data=PostbackActionData.terminate.value,
+                    )
+                ),
+            ]
+        )
+        await self.line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(
+                text="保存したいファイルを送信してください。\n\n終了したい場合は以下のボタンを押してください。",
+                quick_reply=quick_reply,
+            ),
+        )
+
+    async def _handle_file_deletion(self, event: PostbackEvent):
+        DB_LINE_ACCOUNTS.update(
+            UserModel.construct(mode=PostbackActionData.file_deletion.value).dict(),
+            key=self.user_id,
+        )
+        quick_reply = QuickReply(
+            items=[
+                QuickReplyButton(
+                    action=PostbackAction(
+                        label="ファイル削除を終了する",
+                        data=PostbackActionData.terminate.value,
+                    )
+                ),
+            ]
+        )
+        await self.line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(
+                text="削除したいファイルのURLを入力してください。(※未実装です)\n\n終了したい場合は以下のボタンを押してください。",
+                quick_reply=quick_reply,
+            ),
+        )
+
     async def _handle_usage(self, event: PostbackEvent):
         await self.line_bot_api.reply_message(
             event.reply_token,
             TextSendMessage(
-                """このcalliope_botは現在大きく3つの機能を有しております。
-①写真を投稿することで自動的にクラウドに保存され、保存先がurlとして取得できます。平常時メッセージを送った際には、クラウドに保存されている全ての画像のurlを取得できます。
-②メモ一覧, 追加, 削除がリッチメニューを通して操作できます。
-③時間を設定しリマインダーを登録することができます。"""
+                """このcalliope_botは現在大きく3つの機能を有しています。
+基本的に画面下部のリッチメニューを操作することで用いることが出来ます。
+①メモ機能
+メモの一覧、追加、削除が出来ます。手短なメモ帳として使うことが出来ます。
+②リマインダー機能
+リマインダーの一覧、追加,、削除が出来ます。日時を設定してからリマインドしたいことを入力することで、設定された日時にメッセージが送信されます。
+③ファイル機能
+ファイルの一覧、追加が出来ます。合計50MBまでクラウドに保存されます。保存されたファイルはURLとして返ってくるのでURLを通してファイルを見たり、ダウンロードできたりします。
+※フォーマットや端末環境により、URL先で閲覧出来ない可能性があります。
+・その他
+運営している中の人のブログへ直接飛べるメニューがあります。
+
+今後実装予定機能
+- 何機能を使用中であるかを確認できる機能
+- ファイルの削除機能
+- お問い合わせ機能
+- (AIを使用した言語処理)
+
+------
+calliope_bot
+https://line.me/R/ti/p/@574rllla
+calliope(運営している中の人)
+https://line.me/R/ti/p/YzZxFFHMI6"""
             ),
         )
 
@@ -241,23 +364,45 @@ class PostbackEventHandlerMixin(EventHandlerMixinBase):
         data = event.postback.data
         if data == PostbackActionData.memo.value:
             await self._handle_memo(event)
+
         elif data == PostbackActionData.memo_list.value:
             await self._handle_memo_list(event)
+
         elif data == PostbackActionData.memo_post.value:
             await self._handle_memo_post(event)
+
         elif data == PostbackActionData.memo_deletion.value:
             await self._handle_memo_deletion(event)
+
         elif data == PostbackActionData.reminder.value:
             await self._handle_reminder(event)
+
         elif data == PostbackActionData.reminder_list.value:
             await self._handle_reminder_list(event)
+
         elif data == PostbackActionData.reminder_post_content.value:
             await self._handle_reminder_post_content(event)
+
         elif data == PostbackActionData.reminder_deletion.value:
             await self._handle_reminder_deletion(event)
+
+        elif data == PostbackActionData.file.value:
+            await self._handle_file(event)
+
+        elif data == PostbackActionData.file_list.value:
+            await self._handle_file_list(event)
+
+        elif data == PostbackActionData.file_post.value:
+            await self._handle_file_post(event)
+
+        elif data == PostbackActionData.file_deletion.value:
+            await self._handle_file_deletion(event)
+
         elif data == PostbackActionData.usage.value:
             await self._handle_usage(event)
+
         elif data == PostbackActionData.terminate.value:
             await self._handle_terminate(event)
+
         elif data == PostbackActionData.inquiry.value:
             await self._handle_inquiry(event)

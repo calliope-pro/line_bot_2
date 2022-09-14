@@ -1,4 +1,5 @@
 import asyncio
+import mimetypes
 import os
 from datetime import datetime
 from typing import List
@@ -19,7 +20,7 @@ from config.settings import (
     app,
 )
 from handlers import EventsHandler
-from models import PushContentModel, ReminderWithKeyModel
+from models import PushContentModel, ReminderWithKeyModel, UserWithKeyModel
 from scrape_sites import (
     get_text_atcoder,
     get_text_lancers,
@@ -89,11 +90,13 @@ async def notify_reminders():
     return "OK"
 
 
-@app.get("/images/{file_name}")
-async def show_image(file_name: str, token: str):
-    line_account = DB_LINE_ACCOUNTS.fetch({"token": token}).items[0]
-    image = DRIVE_LINE_BOT_DRIVE.get(f'{line_account["key"]}/{file_name}')
-    return responses.StreamingResponse(image.iter_chunks(), media_type="image/png")
+@app.get("/storage/{file_name}")
+def show_file(file_name: str, token: str):
+    user = UserWithKeyModel.parse_obj(DB_LINE_ACCOUNTS.fetch({"token": token}).items[0])
+    file = DRIVE_LINE_BOT_DRIVE.get(f"{user.key}/{file_name}")
+    media_type = mimetypes.guess_type(f"{file_name}")[0]
+    print(media_type)
+    return responses.StreamingResponse(file.iter_chunks(4096), media_type=media_type)
 
 
 @app.post("/push/")
