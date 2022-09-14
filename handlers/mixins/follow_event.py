@@ -13,7 +13,10 @@ class FollowEventHandlerMixin(EventHandlerMixinBase):
     async def handle_follow_event(self, event: FollowEvent):
         DB_LINE_ACCOUNTS.put(
             UserModel(
-                token=str(uuid4()), mode=PostbackActionData.normal.value, memos=[], storage_capacity=0
+                token=str(uuid4()),
+                mode=PostbackActionData.normal.value,
+                memos=[],
+                storage_capacity=0,
             ).dict(),
             key=self.user_id,
         )

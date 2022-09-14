@@ -2,13 +2,13 @@ import os
 
 from linebot import LineBotApi
 from linebot.models.actions import PostbackAction, URIAction
-from linebot.models.send_messages import TextSendMessage
 from linebot.models.rich_menu import (
     RichMenu,
     RichMenuArea,
     RichMenuBounds,
     RichMenuSize,
 )
+from linebot.models.send_messages import TextSendMessage
 
 from config.settings import PostbackActionData
 

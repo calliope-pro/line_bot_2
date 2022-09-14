@@ -225,11 +225,11 @@ class MessageEventHandlerMixin(EventHandlerMixinBase):
             binary_data = b""
             async for b in stream_data.iter_content():
                 binary_data += b
-            if (len(binary_data)+user.storage_capacity > 50*10**6):
+            if len(binary_data) + user.storage_capacity > 50 * 10**6:
                 await self.line_bot_api.reply_message(
                     event.reply_token,
                     TextSendMessage(
-                        text='クラウドの合計で50MBを超えるため保存出来ませんでした。\n\n終了したい場合は以下のボタンを押してください。',
+                        text="クラウドの合計で50MBを超えるため保存出来ませんでした。\n\n終了したい場合は以下のボタンを押してください。",
                         quick_reply=quick_reply,
                     ),
                 )
@@ -240,13 +240,13 @@ class MessageEventHandlerMixin(EventHandlerMixinBase):
                 content_type=stream_data.content_type,
             )
             user.storage_capacity += len(binary_data)
-            DB_LINE_ACCOUNTS.update(user.dict(include={'storage_capacity'}), self.user_id)
+            DB_LINE_ACCOUNTS.update(
+                user.dict(include={"storage_capacity"}), self.user_id
+            )
             await self.line_bot_api.reply_message(
                 event.reply_token,
                 TextSendMessage(
-                    text=(
-                        f'{BASE_PROJECT_URL}/images/{event.message.id}.jpeg?token={user.token}\nに保存しました\n\n終了したい場合は以下のボタンを押してください。'
-                    ),
+                    text=f"{BASE_PROJECT_URL}/images/{event.message.id}.jpeg?token={user.token}\nに保存しました\n\n終了したい場合は以下のボタンを押してください。",
                     quick_reply=quick_reply,
                 ),
             )
@@ -255,11 +255,11 @@ class MessageEventHandlerMixin(EventHandlerMixinBase):
             binary_data = b""
             async for b in stream_data.iter_content():
                 binary_data += b
-            if (len(binary_data)+user.storage_capacity > 50*10**6):
+            if len(binary_data) + user.storage_capacity > 50 * 10**6:
                 await self.line_bot_api.reply_message(
                     event.reply_token,
                     TextSendMessage(
-                        text='クラウドの合計で50MBを超えるため保存出来ませんでした。\n\n終了したい場合は以下のボタンを押してください。',
+                        text="クラウドの合計で50MBを超えるため保存出来ませんでした。\n\n終了したい場合は以下のボタンを押してください。",
                         quick_reply=quick_reply,
                     ),
                 )
@@ -270,13 +270,13 @@ class MessageEventHandlerMixin(EventHandlerMixinBase):
                 content_type=stream_data.content_type,
             )
             user.storage_capacity += len(binary_data)
-            DB_LINE_ACCOUNTS.update(user.dict(include={'storage_capacity'}), self.user_id)
+            DB_LINE_ACCOUNTS.update(
+                user.dict(include={"storage_capacity"}), self.user_id
+            )
             await self.line_bot_api.reply_message(
                 event.reply_token,
                 TextSendMessage(
-                    text=(
-                        f'{BASE_PROJECT_URL}/images/{event.message.id}.mp4?token={user.token}\nに保存しました\n\n終了したい場合は以下のボタンを押してください。'
-                    ),
+                    text=f"{BASE_PROJECT_URL}/images/{event.message.id}.mp4?token={user.token}\nに保存しました\n\n終了したい場合は以下のボタンを押してください。",
                     quick_reply=quick_reply,
                 ),
             )
@@ -285,11 +285,11 @@ class MessageEventHandlerMixin(EventHandlerMixinBase):
             binary_data = b""
             async for b in stream_data.iter_content():
                 binary_data += b
-            if (len(binary_data)+user.storage_capacity > 50*10**6):
+            if len(binary_data) + user.storage_capacity > 50 * 10**6:
                 await self.line_bot_api.reply_message(
                     event.reply_token,
                     TextSendMessage(
-                        text='クラウドの合計で50MBを超えるため保存出来ませんでした。\n\n終了したい場合は以下のボタンを押してください。',
+                        text="クラウドの合計で50MBを超えるため保存出来ませんでした。\n\n終了したい場合は以下のボタンを押してください。",
                         quick_reply=quick_reply,
                     ),
                 )
@@ -300,22 +300,22 @@ class MessageEventHandlerMixin(EventHandlerMixinBase):
                 content_type=stream_data.content_type,
             )
             user.storage_capacity += len(binary_data)
-            DB_LINE_ACCOUNTS.update(user.dict(include={'storage_capacity'}), self.user_id)
+            DB_LINE_ACCOUNTS.update(
+                user.dict(include={"storage_capacity"}), self.user_id
+            )
             await self.line_bot_api.reply_message(
                 event.reply_token,
                 TextSendMessage(
-                    text=(
-                        f'{BASE_PROJECT_URL}/images/{event.message.id}.mp3?token={user.token}\nに保存しました\n\n終了したい場合は以下のボタンを押してください。'
-                    ),
+                    text=f"{BASE_PROJECT_URL}/images/{event.message.id}.mp3?token={user.token}\nに保存しました\n\n終了したい場合は以下のボタンを押してください。",
                     quick_reply=quick_reply,
                 ),
             )
-        elif event.message.type == 'file':
-            if (event.message.file_size+user.storage_capacity > 50*10**6):
+        elif event.message.type == "file":
+            if event.message.file_size + user.storage_capacity > 50 * 10**6:
                 await self.line_bot_api.reply_message(
                     event.reply_token,
                     TextSendMessage(
-                        text='クラウドの合計で50MBを超えるため保存出来ませんでした。\n\n終了したい場合は以下のボタンを押してください。',
+                        text="クラウドの合計で50MBを超えるため保存出来ませんでした。\n\n終了したい場合は以下のボタンを押してください。",
                         quick_reply=quick_reply,
                     ),
                 )
@@ -324,20 +324,20 @@ class MessageEventHandlerMixin(EventHandlerMixinBase):
             async for b in stream_data.iter_content():
                 binary_data += b
 
-            extension: str = event.message.file_name.split('.')[-1]
+            extension: str = event.message.file_name.split(".")[-1]
             self.drive.put(
                 name=f"{self.user_id}/{event.message.id}.{extension}",
                 data=binary_data,
                 content_type=stream_data.content_type,
             )
             user.storage_capacity += event.message.file_size
-            DB_LINE_ACCOUNTS.update(user.dict(include={'storage_capacity'}), self.user_id)
+            DB_LINE_ACCOUNTS.update(
+                user.dict(include={"storage_capacity"}), self.user_id
+            )
             await self.line_bot_api.reply_message(
                 event.reply_token,
                 TextSendMessage(
-                    text=(
-                        f'{BASE_PROJECT_URL}/images/{event.message.id}.{extension}?token={user.token}\nに保存しました\n\n終了したい場合は以下のボタンを押してください。'
-                    ),
+                    text=f"{BASE_PROJECT_URL}/images/{event.message.id}.{extension}?token={user.token}\nに保存しました\n\n終了したい場合は以下のボタンを押してください。",
                     quick_reply=quick_reply,
                 ),
             )
