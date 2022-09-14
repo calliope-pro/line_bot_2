@@ -29,10 +29,10 @@ raw_rich_menu = RichMenu(
     areas=[
         RichMenuArea(
             bounds=RichMenuBounds(
-                x=rich_menu_width*1/30,
+                x=rich_menu_width * 1 / 30,
                 y=0,
-                width=rich_menu_width*8/30,
-                height=rich_menu_height*1/2,
+                width=rich_menu_width * 8 / 30,
+                height=rich_menu_height * 1 / 2,
             ),
             action=PostbackAction(
                 label="handle memos",
@@ -41,10 +41,10 @@ raw_rich_menu = RichMenu(
         ),
         RichMenuArea(
             bounds=RichMenuBounds(
-                x=rich_menu_width*11/30,
+                x=rich_menu_width * 11 / 30,
                 y=0,
-                width=rich_menu_width*8/30,
-                height=rich_menu_height*1/2,
+                width=rich_menu_width * 8 / 30,
+                height=rich_menu_height * 1 / 2,
             ),
             action=PostbackAction(
                 label="handle reminders",
@@ -53,10 +53,10 @@ raw_rich_menu = RichMenu(
         ),
         RichMenuArea(
             bounds=RichMenuBounds(
-                x=rich_menu_width*21/30,
+                x=rich_menu_width * 21 / 30,
                 y=0,
-                width=rich_menu_width*8/30,
-                height=rich_menu_height*1/2,
+                width=rich_menu_width * 8 / 30,
+                height=rich_menu_height * 1 / 2,
             ),
             action=PostbackAction(
                 label="handle files",
@@ -65,10 +65,10 @@ raw_rich_menu = RichMenu(
         ),
         RichMenuArea(
             bounds=RichMenuBounds(
-                x=rich_menu_width*1/30,
-                y=rich_menu_height*1/2,
-                width=rich_menu_width*8/30,
-                height=rich_menu_height*1/2,
+                x=rich_menu_width * 1 / 30,
+                y=rich_menu_height * 1 / 2,
+                width=rich_menu_width * 8 / 30,
+                height=rich_menu_height * 1 / 2,
             ),
             action=PostbackAction(
                 label="usage",
@@ -77,22 +77,22 @@ raw_rich_menu = RichMenu(
         ),
         RichMenuArea(
             bounds=RichMenuBounds(
-                x=rich_menu_width*11/30,
-                y=rich_menu_height*1/2,
-                width=rich_menu_width*8/30,
-                height=rich_menu_height*1/2,
+                x=rich_menu_width * 11 / 30,
+                y=rich_menu_height * 1 / 2,
+                width=rich_menu_width * 8 / 30,
+                height=rich_menu_height * 1 / 2,
             ),
             action=URIAction(
                 label="blog",
-                uri='https://cacaca-blog.vercel.app',
+                uri="https://cacaca-blog.vercel.app",
             ),
         ),
         RichMenuArea(
             bounds=RichMenuBounds(
-                x=rich_menu_width*21/30,
-                y=rich_menu_height*1/2,
-                width=rich_menu_width*8/30,
-                height=rich_menu_height*1/2,
+                x=rich_menu_width * 21 / 30,
+                y=rich_menu_height * 1 / 2,
+                width=rich_menu_width * 8 / 30,
+                height=rich_menu_height * 1 / 2,
             ),
             action=PostbackAction(
                 label="inquiry",
