@@ -17,7 +17,7 @@ try:
 except ImportError:
     print("Development mode...")
 
-PROJECT_DIR = Path().parent.parent
+PROJECT_DIR = Path().resolve().parent.parent
 
 BASE_PROJECT_URL = "https://calliope-bot.deta.dev"
 
