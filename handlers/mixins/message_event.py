@@ -234,8 +234,9 @@ class MessageEventHandlerMixin(EventHandlerMixinBase):
                 event.reply_token,
                 TextSendMessage(
                     text=(
-                        f'{BASE_PROJECT_URL}/images{file_name.replace(self.user_id, "", 1)}?token={user.token}\nに保存しました'
-                    )
+                        f'{BASE_PROJECT_URL}/images{file_name.replace(self.user_id, "", 1)}?token={user.token}\nに保存しました\n\n終了したい場合は以下のボタンを押してください。'
+                    ),
+                    quick_reply=quick_reply,
                 ),
             )
         else:
@@ -289,4 +290,4 @@ class MessageEventHandlerMixin(EventHandlerMixinBase):
             await self._handle_file_post_mode(event, user)
 
         elif user.mode == PostbackActionData.file_deletion.value:
-            await self._handle_file_deletion_mode(event)
+            await self._handle_file_deletion_mode(event, user)
