@@ -3,12 +3,16 @@ from datetime import timedelta, timezone
 from enum import Enum
 
 from aiohttp import ClientSession
-from deta import App, Deta
+from deta import Deta
 from fastapi import FastAPI
 from linebot import AsyncLineBotApi, WebhookParser
 from linebot.aiohttp_async_http_client import AiohttpAsyncHttpClient
 
-app = App(FastAPI())
+try:
+    from deta import App
+    app = App(FastAPI())
+except ImportError:
+    print('Develop mode...')
 
 BASE_PROJECT_URL = "https://calliope-bot.deta.dev"
 
@@ -34,6 +38,7 @@ JST = timezone(timedelta(hours=9), "JST")
 
 class PostbackActionData(Enum):
     normal = "normal"
+    file = "file"
     memo = "memo"
     memo_list = "memo_list"
     memo_post = "memo_post"
