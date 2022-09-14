@@ -2,6 +2,7 @@ import os
 import mimetypes
 from datetime import timedelta, timezone
 from enum import Enum
+from pathlib import Path
 
 from aiohttp import ClientSession
 from deta import Deta
@@ -15,6 +16,8 @@ try:
     app = App(FastAPI())
 except ImportError:
     print("Development mode...")
+
+PROJECT_DIR = Path().parent.parent
 
 BASE_PROJECT_URL = "https://calliope-bot.deta.dev"
 
