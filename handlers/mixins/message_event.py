@@ -235,9 +235,9 @@ class MessageEventHandlerMixin(EventHandlerMixinBase):
                     ),
                 )
 
-            extension = guess_extension(stream_data.content_type)[1:]
+            extension = guess_extension(stream_data.content_type) or ".jpg"
             self.drive.put(
-                name=f"{self.user_id}/{event.message.id}.{extension}",
+                name=f"{self.user_id}/{event.message.id}{extension}",
                 data=binary_data,
                 content_type=stream_data.content_type,
             )
@@ -248,7 +248,7 @@ class MessageEventHandlerMixin(EventHandlerMixinBase):
             await self.line_bot_api.reply_message(
                 event.reply_token,
                 TextSendMessage(
-                    text=f"{BASE_PROJECT_URL}/images/{event.message.id}.{extension}?token={user.token}\nに保存しました\n\n終了したい場合は以下のボタンを押してください。",
+                    text=f"{BASE_PROJECT_URL}/images/{event.message.id}{extension}?token={user.token}\nに保存しました\n\n終了したい場合は以下のボタンを押してください。",
                     quick_reply=quick_reply,
                 ),
             )
@@ -266,9 +266,9 @@ class MessageEventHandlerMixin(EventHandlerMixinBase):
                     ),
                 )
 
-            extension = guess_extension(stream_data.content_type)[1:]
+            extension = guess_extension(stream_data.content_type) or ".mp4"
             self.drive.put(
-                name=f"{self.user_id}/{event.message.id}.{extension}",
+                name=f"{self.user_id}/{event.message.id}{extension}",
                 data=binary_data,
                 content_type=stream_data.content_type,
             )
@@ -279,7 +279,7 @@ class MessageEventHandlerMixin(EventHandlerMixinBase):
             await self.line_bot_api.reply_message(
                 event.reply_token,
                 TextSendMessage(
-                    text=f"{BASE_PROJECT_URL}/images/{event.message.id}.{extension}?token={user.token}\nに保存しました\n\n終了したい場合は以下のボタンを押してください。",
+                    text=f"{BASE_PROJECT_URL}/images/{event.message.id}{extension}?token={user.token}\nに保存しました\n\n終了したい場合は以下のボタンを押してください。",
                     quick_reply=quick_reply,
                 ),
             )
@@ -297,13 +297,12 @@ class MessageEventHandlerMixin(EventHandlerMixinBase):
                     ),
                 )
 
-            extension = guess_extension(stream_data.content_type)[1:] or 'm4a'
+            extension = guess_extension(stream_data.content_type) or ".m4a"
             self.drive.put(
-                name=f"{self.user_id}/{event.message.id}.{extension}",
+                name=f"{self.user_id}/{event.message.id}{extension}",
                 data=binary_data,
                 content_type=stream_data.content_type,
             )
-            print(stream_data.content_type)
             user.storage_capacity += len(binary_data)
             DB_LINE_ACCOUNTS.update(
                 user.dict(include={"storage_capacity"}), self.user_id
@@ -311,7 +310,7 @@ class MessageEventHandlerMixin(EventHandlerMixinBase):
             await self.line_bot_api.reply_message(
                 event.reply_token,
                 TextSendMessage(
-                    text=f"{BASE_PROJECT_URL}/images/{event.message.id}.{extension}?token={user.token}\nに保存しました\n\n終了したい場合は以下のボタンを押してください。",
+                    text=f"{BASE_PROJECT_URL}/images/{event.message.id}{extension}?token={user.token}\nに保存しました\n\n終了したい場合は以下のボタンを押してください。",
                     quick_reply=quick_reply,
                 ),
             )
