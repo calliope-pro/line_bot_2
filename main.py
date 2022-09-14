@@ -95,7 +95,7 @@ async def show_image(file_name: str, token: str):
     user = UserWithKeyModel.parse_obj(DB_LINE_ACCOUNTS.fetch({"token": token}).items[0])
     image = DRIVE_LINE_BOT_DRIVE.get(f"{user.key}/{file_name}")
     return responses.StreamingResponse(
-        image.iter_chunks(), media_type=mimetypes.guess_type(file_name)
+        image.iter_chunks(), media_type=mimetypes.guess_type(file_name)[0]
     )
 
 
