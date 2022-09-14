@@ -95,7 +95,7 @@ async def notify_reminders():
 def show_file(file_name: str, token: str):
     user = UserWithKeyModel.parse_obj(DB_LINE_ACCOUNTS.fetch({"token": token}).items[0])
     file = DRIVE_LINE_BOT_DRIVE.get(f"{user.key}/{file_name}")
-    tmp_path = Path('tmp') / user.key
+    tmp_path = Path('tmp').resolve().parent / user.key
     try:
         if not tmp_path.exists():
             tmp_path.mkdir(exist_ok=True)
