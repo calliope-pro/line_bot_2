@@ -1,7 +1,7 @@
 import os
+import mimetypes
 from datetime import timedelta, timezone
 from enum import Enum
-from mimetypes import types_map
 
 from aiohttp import ClientSession
 from deta import Deta
@@ -37,8 +37,8 @@ IS_MAINTENANCE = bool(int(os.environ["IS_MAINTENANCE"]))
 
 JST = timezone(timedelta(hours=9), "JST")
 
-types_map[".m4a"] = "audio/x-m4a"
-types_map[".mp3"] = "audio/mpeg"
+mimetypes.add_type("audio/x-m4a", ".m4a")
+mimetypes.add_type("audio/mpeg", ".mp3")
 
 
 class PostbackActionData(Enum):
