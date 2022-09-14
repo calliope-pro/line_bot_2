@@ -1,4 +1,4 @@
-from io import BytesIO
+from io import RawIOBase
 from datetime import datetime, timedelta
 from mimetypes import guess_extension
 from typing import List
@@ -224,7 +224,7 @@ class MessageEventHandlerMixin(EventHandlerMixinBase):
         )
         if event.message.type == "image":
             stream_data = await self.line_bot_api.get_message_content(event.message.id)
-            binary_data = BytesIO()
+            binary_data = RawIOBase()
             async for b in stream_data.iter_content():
                 binary_data.write(b)
             if len(binary_data) + user.storage_capacity > 50 * 10**6:
