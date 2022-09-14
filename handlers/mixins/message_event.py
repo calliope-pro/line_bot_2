@@ -234,6 +234,7 @@ class MessageEventHandlerMixin(EventHandlerMixinBase):
                         quick_reply=quick_reply,
                     ),
                 )
+                return
 
             extension = guess_extension(stream_data.content_type)
             self.drive.put(
@@ -265,6 +266,7 @@ class MessageEventHandlerMixin(EventHandlerMixinBase):
                         quick_reply=quick_reply,
                     ),
                 )
+                return
 
             extension = guess_extension(stream_data.content_type)
             self.drive.put(
@@ -296,6 +298,7 @@ class MessageEventHandlerMixin(EventHandlerMixinBase):
                         quick_reply=quick_reply,
                     ),
                 )
+                return
 
             print(stream_data.content_type)
             print(guess_extension(stream_data.content_type))
@@ -325,6 +328,8 @@ class MessageEventHandlerMixin(EventHandlerMixinBase):
                         quick_reply=quick_reply,
                     ),
                 )
+                return
+
             stream_data = await self.line_bot_api.get_message_content(event.message.id)
             binary_data = b""
             async for b in stream_data.iter_content():
