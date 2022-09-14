@@ -224,7 +224,7 @@ class MessageEventHandlerMixin(EventHandlerMixinBase):
         if event.message.type == "image":
             stream_data = await self.line_bot_api.get_message_content(event.message.id)
             binary_data = b""
-            for b in stream_data.iter_content():
+            async for b in stream_data.iter_content():
                 binary_data += b
             if len(binary_data) + user.storage_capacity > 50 * 10**6:
                 await self.line_bot_api.reply_message(
@@ -256,7 +256,7 @@ class MessageEventHandlerMixin(EventHandlerMixinBase):
         elif event.message.type == "video":
             stream_data = await self.line_bot_api.get_message_content(event.message.id)
             binary_data = b""
-            for b in stream_data.iter_content():
+            async for b in stream_data.iter_content(4096):
                 binary_data += b
             if len(binary_data) + user.storage_capacity > 50 * 10**6:
                 await self.line_bot_api.reply_message(
@@ -288,7 +288,7 @@ class MessageEventHandlerMixin(EventHandlerMixinBase):
         elif event.message.type == "audio":
             stream_data = await self.line_bot_api.get_message_content(event.message.id)
             binary_data = b""
-            for b in stream_data.iter_content():
+            async for b in stream_data.iter_content(4096):
                 binary_data += b
             if len(binary_data) + user.storage_capacity > 50 * 10**6:
                 await self.line_bot_api.reply_message(
@@ -300,8 +300,6 @@ class MessageEventHandlerMixin(EventHandlerMixinBase):
                 )
                 return
 
-            print(stream_data.content_type)
-            print(guess_extension(stream_data.content_type))
             extension = guess_extension(stream_data.content_type)
             self.drive.put(
                 name=f"{self.user_id}/{event.message.id}{extension}",
@@ -332,7 +330,7 @@ class MessageEventHandlerMixin(EventHandlerMixinBase):
 
             stream_data = await self.line_bot_api.get_message_content(event.message.id)
             binary_data = b""
-            for b in stream_data.iter_content():
+            async for b in stream_data.iter_content():
                 binary_data += b
 
             extension: str = event.message.file_name.split(".")[-1]

@@ -93,14 +93,14 @@ async def notify_reminders():
 
 
 @app.get("/storage/{file_name}")
-def show_file(file_name: str, token: str):
+async def show_file(file_name: str, token: str):
     user = UserWithKeyModel.parse_obj(DB_LINE_ACCOUNTS.fetch({"token": token}).items[0])
     file = DRIVE_LINE_BOT_DRIVE.get(f"{user.key}/{file_name}")
     tmp_path = PROJECT_DIR / "tmp"
     if not tmp_path.exists():
         tmp_path.mkdir(exist_ok=True)
     with (tmp_path / f'{user.key}-{file_name}').open("wb") as f:
-        for chunk in file.iter_chunks(4096):
+        async for chunk in file.iter_chunks(4096):
             f.write(chunk)
         file.close()
     media_type = mimetypes.guess_type(f'{file_name}')[0]
