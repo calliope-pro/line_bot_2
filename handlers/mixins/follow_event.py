@@ -12,7 +12,9 @@ from .base import EventHandlerMixinBase
 class FollowEventHandlerMixin(EventHandlerMixinBase):
     async def handle_follow_event(self, event: FollowEvent):
         DB_LINE_ACCOUNTS.put(
-            UserModel().dict(),
+            UserModel(
+                token=str(uuid4()), mode=PostbackActionData.normal.value, memos=[], storage_capacity=0
+            ).dict(),
             key=self.user_id,
         )
 
