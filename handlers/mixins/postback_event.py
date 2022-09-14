@@ -267,7 +267,7 @@ class PostbackEventHandlerMixin(EventHandlerMixinBase):
         else:
             await self.line_bot_api.reply_message(
                 event.reply_token,
-                TextSendMessage(text="クラウドに保存されている画像はありません。"),
+                TextSendMessage(text="クラウドに保存されているファイルはありません。"),
             )
 
     async def _handle_file_post(self, event: PostbackEvent):
@@ -311,7 +311,7 @@ class PostbackEventHandlerMixin(EventHandlerMixinBase):
         await self.line_bot_api.reply_message(
             event.reply_token,
             TextSendMessage(
-                text="削除したいファイルのURLを入力してください。\n\n終了したい場合は以下のボタンを押してください。",
+                text="削除したいファイルのURLを入力してください。(※未実装です)\n\n終了したい場合は以下のボタンを押してください。",
                 quick_reply=quick_reply,
             ),
         )
