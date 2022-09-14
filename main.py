@@ -1,5 +1,4 @@
 import asyncio
-from io import BytesIO
 import mimetypes
 import os
 from datetime import datetime
@@ -95,11 +94,15 @@ async def notify_reminders():
 def show_file(file_name: str, token: str):
     user = UserWithKeyModel.parse_obj(DB_LINE_ACCOUNTS.fetch({"token": token}).items[0])
     file = DRIVE_LINE_BOT_DRIVE.get(f"{user.key}/{file_name}")
-    print(file_name)
     media_type = mimetypes.guess_type(file_name)[0]
-    print(media_type)
+    DB_SCRAPE_RESULTS.put(
+        {
+            "name": media_type,
+        },
+        "storage-data",
+    )
     try:
-        return responses.StreamingResponse(file.iter_lines(1024**2), media_type=media_type)
+        return responses.StreamingResponse(file.iter_lines(4096), media_type=media_type)
     except Exception as e:
         print(e)
 
