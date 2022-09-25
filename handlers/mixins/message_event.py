@@ -375,7 +375,7 @@ class MessageEventHandlerMixin(EventHandlerMixinBase):
         )
         try:
             is_matched = re.match(
-                fr"^{BASE_PROJECT_URL}/storage/(.+)\?token=(.+)$", event.message.text
+                rf"^{BASE_PROJECT_URL}/storage/(.+)\?token=(.+)$", event.message.text
             )
             if is_matched is None:
                 raise ValueError("Invalid URL.")
@@ -407,7 +407,9 @@ class MessageEventHandlerMixin(EventHandlerMixinBase):
             else:
                 await self.line_bot_api.reply_message(
                     event.reply_token,
-                    TextSendMessage(text="クラウドに保存されているファイルはありません。", quick_reply=quick_reply),
+                    TextSendMessage(
+                        text="クラウドに保存されているファイルはありません。", quick_reply=quick_reply
+                    ),
                 )
         except (ValueError, IndexError, TypeError):
             await self.line_bot_api.reply_message(
