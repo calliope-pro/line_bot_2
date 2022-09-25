@@ -379,12 +379,10 @@ class MessageEventHandlerMixin(EventHandlerMixinBase):
             )
             if is_matched is None:
                 raise ValueError("Invalid URL.")
-            content_size = sum(
-                len(chunk)
-                for chunk in self.drive.get(
-                    f"{self.user_id}/{is_matched.group(1)}"
-                ).iter_chunks(4096)
-            )
+            stream_data = self.drive.get(f"{self.user_id}/{is_matched.group(1)}")
+            if stream_data is None:
+                raise ValueError("Invalid URL.")
+            content_size = sum(len(chunk) for chunk in stream_data.iter_chunks(4096))
             self.drive.delete(f"{self.user_id}/{is_matched.group(1)}")
             user.storage_capacity -= content_size
             DB_LINE_ACCOUNTS.update(
