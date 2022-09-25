@@ -381,6 +381,7 @@ class MessageEventHandlerMixin(EventHandlerMixinBase):
                 raise ValueError("Invalid URL.")
             if is_matched.group(2) != user.token:
                 raise ValueError("Invalid token")
+
             stream_data = self.drive.get(f"{self.user_id}/{is_matched.group(1)}")
             if stream_data is None:
                 raise ValueError("Invalid URL.")
