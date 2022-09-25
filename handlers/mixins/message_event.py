@@ -400,7 +400,8 @@ class MessageEventHandlerMixin(EventHandlerMixinBase):
                                 lambda x: f'{BASE_PROJECT_URL}/storage{x.replace(self.user_id, "", 1)}?token={user.token}',
                                 image_file_paths,
                             )
-                        )
+                        ),
+                        quick_reply=quick_reply,
                     ),
                 )
             else:
@@ -412,7 +413,7 @@ class MessageEventHandlerMixin(EventHandlerMixinBase):
             await self.line_bot_api.reply_message(
                 event.reply_token,
                 TextSendMessage(
-                    text="有効なURLを入力してください。\n\n終了したい場合は以下のボタンを押してください。",
+                    text="有効なURLのフォーマットを入力してください。\n\n終了したい場合は以下のボタンを押してください。",
                     quick_reply=quick_reply,
                 ),
             )
