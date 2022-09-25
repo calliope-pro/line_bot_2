@@ -23,5 +23,5 @@ class FollowEventHandlerMixin(EventHandlerMixinBase):
 
         await self.line_bot_api.reply_message(
             event.reply_token,
-            TextSendMessage(text="Welcome!"),
+            TextSendMessage(text="友達追加ありがとうございます。詳しい使い方は画面下部のリッチメニュー内の「取扱説明書」をご覧ください。"),
         )
