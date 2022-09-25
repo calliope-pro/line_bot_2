@@ -407,7 +407,7 @@ class MessageEventHandlerMixin(EventHandlerMixinBase):
             else:
                 await self.line_bot_api.reply_message(
                     event.reply_token,
-                    TextSendMessage(text="クラウドに保存されているファイルはありません。"),
+                    TextSendMessage(text="クラウドに保存されているファイルはありません。", quick_reply=quick_reply),
                 )
         except (ValueError, IndexError, TypeError):
             await self.line_bot_api.reply_message(
