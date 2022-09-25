@@ -1,3 +1,4 @@
+import random
 from datetime import datetime, timedelta
 from typing import List
 
@@ -358,9 +359,22 @@ https://line.me/R/ti/p/YzZxFFHMI6"""
             event.reply_token, TextSendMessage(text="終了しました。")
         )
 
-    async def _handle_inquiry(self, event: PostbackEvent):
+    async def _handle_oracle(self, event: PostbackEvent):
+        today = datetime.now(JST).replace(tzinfo=None).date().isoformat()
+        lotteries = {
+            '大吉': 17,
+            '吉': 35,
+            '半吉': 5,
+            '小吉': 4,
+            '末小吉': 3,
+            '末吉': 6,
+            '凶': 30,
+        }
+        random.seed(f"{today}-{self.user_id}")
+        chosen_lottery = random.choices(tuple(lotteries.keys()), weights=tuple(lotteries.values()))[0]
+
         await self.line_bot_api.reply_message(
-            event.reply_token, TextSendMessage(text="作成中です。")
+            event.reply_token, TextSendMessage(text=f"本日の運勢は{chosen_lottery}です")
         )
 
     async def handle_postback_event(self, event: PostbackEvent):
@@ -407,5 +421,5 @@ https://line.me/R/ti/p/YzZxFFHMI6"""
         elif data == PostbackActionData.terminate.value:
             await self._handle_terminate(event)
 
-        elif data == PostbackActionData.inquiry.value:
-            await self._handle_inquiry(event)
+        elif data == PostbackActionData.oracle.value:
+            await self._handle_oracle(event)
