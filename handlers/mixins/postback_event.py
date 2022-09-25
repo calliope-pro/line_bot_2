@@ -311,7 +311,7 @@ class PostbackEventHandlerMixin(EventHandlerMixinBase):
         await self.line_bot_api.reply_message(
             event.reply_token,
             TextSendMessage(
-                text="削除したいファイルのURLを入力してください。(※未実装です)\n\n終了したい場合は以下のボタンを押してください。",
+                text="削除したいファイルのURLを入力してください。\n\n終了したい場合は以下のボタンを押してください。",
                 quick_reply=quick_reply,
             ),
         )
