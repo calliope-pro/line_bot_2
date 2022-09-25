@@ -394,16 +394,14 @@ https://line.me/R/ti/p/YzZxFFHMI6"""
                         ImageCarouselColumn(
                             image_url="https://media.istockphoto.com/photos/sensoji-temple-in-tokyo-japan-tokyo-japan-january-22-2019sensoji-at-picture-id1139651438?k=20&m=1139651438&s=612x612&w=0&h=UVzDniEQawMesuHOvsYnn0RSgZNHQVL9SDZjBgLh5cY=",
                             action=PostbackAction(
-                                label="sensoji",
-                                display_text="浅草寺のくじパターンで引く",
+                                label="浅草寺のくじパターンで引く",
                                 data=PostbackActionData.sensoji_oracle.value,
                             ),
                         ),
                         ImageCarouselColumn(
                             image_url="https://media.istockphoto.com/photos/torii-gates-in-fushimi-inari-shrine-kyoto-japan-picture-id491222300?k=20&m=491222300&s=612x612&w=0&h=ZU3yWv_26vyDqfQCinhu7AwWrROFP7BqyZfbgyK2R2E=",
                             action=PostbackAction(
-                                label="fushimi",
-                                display_text="伏見稲荷大社のくじパターンで引く",
+                                label="伏見稲荷大社のくじパターンで引く",
                                 data=PostbackActionData.fushimi_oracle.value,
                             ),
                         ),
