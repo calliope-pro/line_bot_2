@@ -87,7 +87,6 @@ raw_rich_menu = RichMenu(
                 label="draw an oracle",
                 data=PostbackActionData.oracle.value,
             ),
-
         ),
         RichMenuArea(
             bounds=RichMenuBounds(
