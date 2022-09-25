@@ -1,3 +1,4 @@
+import re
 from datetime import datetime, timedelta
 from mimetypes import guess_extension
 from typing import List
@@ -372,13 +373,49 @@ class MessageEventHandlerMixin(EventHandlerMixinBase):
                 ),
             ]
         )
-        await self.line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage(
-                text="作成中です。\n\n終了したい場合は以下のボタンを押してください。",
-                quick_reply=quick_reply,
-            ),
-        )
+        try:
+            is_matched = re.match(
+                f"^{BASE_PROJECT_URL}/storage/(.+)\?token=.+$", event.message.text
+            )
+            if is_matched is None:
+                raise ValueError("Invalid URL.")
+            content_size = sum(
+                len(chunk)
+                for chunk in self.drive.get(
+                    f"{self.user_id}/{is_matched.group(1)}"
+                ).iter_chunks(4096)
+            )
+            self.drive.delete(f"{self.user_id}/{is_matched.group(1)}")
+            user.storage_capacity -= content_size
+            DB_LINE_ACCOUNTS.update(
+                user.dict(include={"storage_capacity"}), key=self.user_id
+            )
+            image_file_paths: List[str] = self.drive.list(prefix=self.user_id)["names"]
+            if image_file_paths:
+                await self.line_bot_api.reply_message(
+                    event.reply_token,
+                    TextSendMessage(
+                        text="\n\n".join(
+                            map(
+                                lambda x: f'{BASE_PROJECT_URL}/storage{x.replace(self.user_id, "", 1)}?token={user.token}',
+                                image_file_paths,
+                            )
+                        )
+                    ),
+                )
+            else:
+                await self.line_bot_api.reply_message(
+                    event.reply_token,
+                    TextSendMessage(text="クラウドに保存されているファイルはありません。"),
+                )
+        except (ValueError, IndexError, TypeError):
+            await self.line_bot_api.reply_message(
+                event.reply_token,
+                TextSendMessage(
+                    text="有効なURLを入力してください。\n\n終了したい場合は以下のボタンを押してください。",
+                    quick_reply=quick_reply,
+                ),
+            )
 
     async def handle_message_event(self, event: MessageEvent):
         user = UserWithKeyModel.parse_obj(DB_LINE_ACCOUNTS.get(self.user_id))
