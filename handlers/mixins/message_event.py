@@ -375,10 +375,12 @@ class MessageEventHandlerMixin(EventHandlerMixinBase):
         )
         try:
             is_matched = re.match(
-                f"^{BASE_PROJECT_URL}/storage/(.+)\?token=.+$", event.message.text
+                f"^{BASE_PROJECT_URL}/storage/(.+)\?token=(.+)$", event.message.text
             )
             if is_matched is None:
                 raise ValueError("Invalid URL.")
+            if is_matched.group(2) != user.token:
+                raise ValueError("Invalid token")
             stream_data = self.drive.get(f"{self.user_id}/{is_matched.group(1)}")
             if stream_data is None:
                 raise ValueError("Invalid URL.")
