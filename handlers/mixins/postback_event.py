@@ -1,19 +1,25 @@
+import random
 from datetime import datetime, timedelta
 from typing import List
 
 from linebot.models.actions import DatetimePickerAction, PostbackAction
 from linebot.models.events import PostbackEvent
 from linebot.models.send_messages import QuickReply, QuickReplyButton, TextSendMessage
+from linebot.models.template import (
+    ImageCarouselColumn,
+    ImageCarouselTemplate,
+    TemplateSendMessage,
+)
 from pydantic import parse_obj_as
 
 from config.settings import (
     BASE_PROJECT_URL,
     DB_LINE_ACCOUNTS,
     DB_REMINDERS,
-    JST,
     PostbackActionData,
 )
 from models import ReminderModel, ReminderWithKeyModel, UserModel, UserWithKeyModel
+from utils.time import get_jst_from_utc_isoformat, get_jst_now
 
 from .base import EventHandlerMixinBase
 
@@ -113,7 +119,7 @@ class PostbackEventHandlerMixin(EventHandlerMixinBase):
         )
 
     async def _handle_reminder(self, event: PostbackEvent):
-        now = datetime.now(JST).replace(tzinfo=None)
+        now = get_jst_now()
         quick_reply = QuickReply(
             items=[
                 QuickReplyButton(
@@ -156,7 +162,7 @@ class PostbackEventHandlerMixin(EventHandlerMixinBase):
         if user_reminders:
             reminder_list_text = "現在クラウドに保存されているリマインダーは↓\n"
             reminder_list_text += "\n".join(
-                f'{number}:\n{(datetime.fromisoformat(reminder.datetime) + timedelta(hours=9)).strftime("%Y/%m/%d %H:%M")} {reminder.content}'
+                f'{number}:\n{(get_jst_from_utc_isoformat(reminder.datetime)).strftime("%Y/%m/%d %H:%M")} {reminder.content}'
                 for number, reminder in enumerate(user_reminders, 1)
             )
         else:
@@ -331,8 +337,8 @@ class PostbackEventHandlerMixin(EventHandlerMixinBase):
 ファイルの一覧、追加、削除が出来ます。合計50MBまでクラウドに保存されます。保存されたファイルはURLとして返ってくるためURLを通してファイルを見たり、ダウンロードできたりします。
 ※フォーマットや端末環境により、URL先で閲覧出来ない可能性があります。
 ・その他
-日替わりおみくじ機能(現在作成中)
-運営している中の人のブログへ直接飛べるメニューがあります。
+④日替わりおみくじ機能(くじの割合は浅草寺と伏見稲荷大社を模倣しています)
+⑤運営している中の人のブログへ直接飛べるメニューがあります。
 
 今後実装予定機能
 - リマインダーの連続追加機能
@@ -358,9 +364,83 @@ https://line.me/R/ti/p/YzZxFFHMI6"""
             event.reply_token, TextSendMessage(text="終了しました。")
         )
 
-    async def _handle_inquiry(self, event: PostbackEvent):
+    async def _handle_oracle(self, event: PostbackEvent):
         await self.line_bot_api.reply_message(
-            event.reply_token, TextSendMessage(text="作成中です。")
+            event.reply_token,
+            [
+                TextSendMessage(text="どの吉凶配分で引きますか"),
+                TemplateSendMessage(
+                    alt_text="Choose lottery pattern",
+                    template=ImageCarouselTemplate(
+                        [
+                            ImageCarouselColumn(
+                                image_url="https://media.istockphoto.com/photos/sensoji-temple-in-tokyo-japan-tokyo-japan-january-22-2019sensoji-at-picture-id1139651438?k=20&m=1139651438&s=612x612&w=0&h=UVzDniEQawMesuHOvsYnn0RSgZNHQVL9SDZjBgLh5cY=",
+                                action=PostbackAction(
+                                    label="浅草寺",
+                                    data=PostbackActionData.sensoji_oracle.value,
+                                ),
+                            ),
+                            ImageCarouselColumn(
+                                image_url="https://media.istockphoto.com/photos/torii-gates-in-fushimi-inari-shrine-kyoto-japan-picture-id491222300?k=20&m=491222300&s=612x612&w=0&h=ZU3yWv_26vyDqfQCinhu7AwWrROFP7BqyZfbgyK2R2E=",
+                                action=PostbackAction(
+                                    label="伏見稲荷大社",
+                                    data=PostbackActionData.fushimi_oracle.value,
+                                ),
+                            ),
+                        ]
+                    ),
+                ),
+            ],
+        )
+
+    async def _handle_sensoji_oracle(self, event: PostbackEvent):
+        today = get_jst_now().date().isoformat()
+        lotteries = {
+            "大吉": 17,
+            "吉": 35,
+            "半吉": 5,
+            "小吉": 4,
+            "末小吉": 3,
+            "末吉": 6,
+            "凶": 30,
+        }
+        random.seed(f"{today}-{self.user_id}")
+        chosen_lottery = random.choices(
+            tuple(lotteries.keys()), weights=tuple(lotteries.values())
+        )[0]
+        await self.line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text=f"本日の運勢は{chosen_lottery}です。"),
+        )
+
+    async def _handle_fushimi_oracle(self, event: PostbackEvent):
+        today = get_jst_now().date().isoformat()
+        lotteries = {
+            "大大吉": 2,
+            "大吉": 6,
+            "凶後大吉": 1,
+            "凶後吉": 4,
+            "末大吉": 3,
+            "末吉": 3,
+            "向大吉": 2,
+            "吉": 2,
+            "中吉": 1,
+            "小吉": 1,
+            "小凶後吉": 1,
+            "後吉": 1,
+            "吉凶未分末大吉": 1,
+            "吉凶不分末吉": 1,
+            "吉凶相半": 1,
+            "吉凶相交末吉": 1,
+            "吉凶相央": 1,
+        }
+        random.seed(f"{today}-{self.user_id}")
+        chosen_lottery = random.choices(
+            tuple(lotteries.keys()), weights=tuple(lotteries.values())
+        )[0]
+        await self.line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text=f"本日の運勢は{chosen_lottery}です。"),
         )
 
     async def handle_postback_event(self, event: PostbackEvent):
@@ -407,5 +487,11 @@ https://line.me/R/ti/p/YzZxFFHMI6"""
         elif data == PostbackActionData.terminate.value:
             await self._handle_terminate(event)
 
-        elif data == PostbackActionData.inquiry.value:
-            await self._handle_inquiry(event)
+        elif data == PostbackActionData.oracle.value:
+            await self._handle_oracle(event)
+
+        elif data == PostbackActionData.sensoji_oracle.value:
+            await self._handle_sensoji_oracle(event)
+
+        elif data == PostbackActionData.fushimi_oracle.value:
+            await self._handle_fushimi_oracle(event)

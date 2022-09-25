@@ -83,9 +83,9 @@ raw_rich_menu = RichMenu(
                 width=rich_menu_width * 8 / 30,
                 height=rich_menu_height * 1 / 2,
             ),
-            action=URIAction(
-                label="blog",
-                uri="https://cacaca-blog.vercel.app",
+            action=PostbackAction(
+                label="draw an oracle",
+                data=PostbackActionData.oracle.value,
             ),
         ),
         RichMenuArea(
@@ -95,9 +95,9 @@ raw_rich_menu = RichMenu(
                 width=rich_menu_width * 8 / 30,
                 height=rich_menu_height * 1 / 2,
             ),
-            action=PostbackAction(
-                label="inquiry",
-                data=PostbackActionData.inquiry.value,
+            action=URIAction(
+                label="blog",
+                uri="https://cacaca-blog.vercel.app",
             ),
         ),
     ],
