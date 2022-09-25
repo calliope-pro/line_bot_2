@@ -60,5 +60,5 @@ class PostbackActionData(Enum):
     file_post = "file_post"
     file_deletion = "file_deletion"
     usage = "usage"
-    inquiry = "inquiry"
+    oracle = "oracle"
     terminate = "terminate"
