@@ -375,7 +375,7 @@ class MessageEventHandlerMixin(EventHandlerMixinBase):
         )
         try:
             is_matched = re.match(
-                f"^{BASE_PROJECT_URL}/storage/(.+)\?token=(.+)$", event.message.text
+                fr"^{BASE_PROJECT_URL}/storage/(.+)\?token=(.+)$", event.message.text
             )
             if is_matched is None:
                 raise ValueError("Invalid URL.")
