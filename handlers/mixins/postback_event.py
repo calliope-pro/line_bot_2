@@ -365,49 +365,32 @@ https://line.me/R/ti/p/YzZxFFHMI6"""
         )
 
     async def _handle_oracle(self, event: PostbackEvent):
-        today = get_jst_now().date().isoformat()
-        lotteries = {
-            "大吉": 17,
-            "吉": 35,
-            "半吉": 5,
-            "小吉": 4,
-            "末小吉": 3,
-            "末吉": 6,
-            "凶": 30,
-        }
-        random.seed(f"{today}-{self.user_id}")
-        chosen_lottery = random.choices(
-            tuple(lotteries.keys()), weights=tuple(lotteries.values())
-        )[0]
-
-        await self.line_bot_api.reply_message(
-            event.reply_token, TextSendMessage(text=f"本日の運勢は{chosen_lottery}です")
-        )
-
-    async def _handle_oracle(self, event: PostbackEvent):
         await self.line_bot_api.reply_message(
             event.reply_token,
-            TemplateSendMessage(
-                alt_text="Choose lottery pattern",
-                template=ImageCarouselTemplate(
-                    [
-                        ImageCarouselColumn(
-                            image_url="https://media.istockphoto.com/photos/sensoji-temple-in-tokyo-japan-tokyo-japan-january-22-2019sensoji-at-picture-id1139651438?k=20&m=1139651438&s=612x612&w=0&h=UVzDniEQawMesuHOvsYnn0RSgZNHQVL9SDZjBgLh5cY=",
-                            action=PostbackAction(
-                                label="浅草寺のくじパターンで引く",
-                                data=PostbackActionData.sensoji_oracle.value,
+            [
+                TextSendMessage(text="どの吉凶配分で引きますか"),
+                TemplateSendMessage(
+                    alt_text="Choose lottery pattern",
+                    template=ImageCarouselTemplate(
+                        [
+                            ImageCarouselColumn(
+                                image_url="https://media.istockphoto.com/photos/sensoji-temple-in-tokyo-japan-tokyo-japan-january-22-2019sensoji-at-picture-id1139651438?k=20&m=1139651438&s=612x612&w=0&h=UVzDniEQawMesuHOvsYnn0RSgZNHQVL9SDZjBgLh5cY=",
+                                action=PostbackAction(
+                                    label="浅草寺",
+                                    data=PostbackActionData.sensoji_oracle.value,
+                                ),
                             ),
-                        ),
-                        ImageCarouselColumn(
-                            image_url="https://media.istockphoto.com/photos/torii-gates-in-fushimi-inari-shrine-kyoto-japan-picture-id491222300?k=20&m=491222300&s=612x612&w=0&h=ZU3yWv_26vyDqfQCinhu7AwWrROFP7BqyZfbgyK2R2E=",
-                            action=PostbackAction(
-                                label="伏見稲荷大社のくじパターンで引く",
-                                data=PostbackActionData.fushimi_oracle.value,
+                            ImageCarouselColumn(
+                                image_url="https://media.istockphoto.com/photos/torii-gates-in-fushimi-inari-shrine-kyoto-japan-picture-id491222300?k=20&m=491222300&s=612x612&w=0&h=ZU3yWv_26vyDqfQCinhu7AwWrROFP7BqyZfbgyK2R2E=",
+                                action=PostbackAction(
+                                    label="伏見稲荷大社",
+                                    data=PostbackActionData.fushimi_oracle.value,
+                                ),
                             ),
-                        ),
-                    ]
+                        ]
+                    ),
                 ),
-            ),
+            ],
         )
 
     async def _handle_sensoji_oracle(self, event: PostbackEvent):
