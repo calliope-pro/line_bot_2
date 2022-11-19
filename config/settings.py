@@ -56,6 +56,7 @@ class PostbackActionData(Enum):
     reminder_post_content = "reminder_post_content"
     reminder_deletion = "reminder_deletion"
     file = "file"
+    file_storage_capacity = "file_storage_capacity"
     file_list = "file_list"
     file_post = "file_post"
     file_deletion = "file_deletion"
