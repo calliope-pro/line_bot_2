@@ -260,7 +260,7 @@ class PostbackEventHandlerMixin(EventHandlerMixinBase):
                 quick_reply=quick_reply,
             ),
         )
-    
+
     async def _handle_file_capacity(self, event: PostbackEvent):
         user = UserWithKeyModel.parse_obj(DB_LINE_ACCOUNTS.get(self.user_id))
         await self.line_bot_api.reply_message(
@@ -486,7 +486,7 @@ https://line.me/R/ti/p/YzZxFFHMI6"""
 
         elif data == PostbackActionData.file.value:
             await self._handle_file(event)
-        
+
         elif data == PostbackActionData.file_storage_capacity.value:
             await self._handle_file_capacity(event)
 
