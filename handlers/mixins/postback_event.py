@@ -266,7 +266,7 @@ class PostbackEventHandlerMixin(EventHandlerMixinBase):
         await self.line_bot_api.reply_message(
             event.reply_token,
             TextSendMessage(
-                text=f"現在のクラウドの容量:{user.storage_capacity/10**6:.2f}/50MB",
+                text=f"現在のクラウドの容量\n{user.storage_capacity/10**6:.2f}/50 MB",
             ),
         )
 
