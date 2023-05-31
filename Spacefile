@@ -13,3 +13,8 @@ micros:
         - name: MY_LINE_USER_ID
         - name: CHANNEL_SECRET
         - name: CHANNEL_ACCESS_TOKEN
+    actions:
+      - id: reminder
+        name: reminder
+        trigger: schedule
+        default_interval: '1 minute'

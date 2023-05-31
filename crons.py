@@ -5,8 +5,8 @@ import requests
 from config.settings import BASE_PROJECT_URL, JST, app
 
 
-@app.lib.cron()
-def notify_reminders(event):
+@app.post('/__space/v0/actions')
+def notify_reminders():
     try:
         requests.get(f"{BASE_PROJECT_URL}/remind/")
     except Exception as e:
