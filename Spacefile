@@ -1,0 +1,15 @@
+# Spacefile Docs: https://go.deta.dev/docs/spacefile/v0
+v: 0
+micros:
+  - name: line_bot
+    src: ./
+    engine: python3.9
+    primary: true
+    public: true
+    presets:
+      env:
+        - name: IS_MAINTENANCE
+          default: '0'
+        - name: MY_LINE_USER_ID
+        - name: CHANNEL_SECRET
+        - name: CHANNEL_ACCESS_TOKEN
