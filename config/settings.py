@@ -19,7 +19,7 @@ except ImportError:
 
 PROJECT_DIR = Path().resolve().parent.parent
 
-BASE_PROJECT_URL = "https://calliope-bot.deta.dev"
+BASE_PROJECT_URL = "https://vz88mi.deta.dev"
 
 CHANNEL_SECRET = os.environ["CHANNEL_SECRET"]
 CHANNEL_ACCESS_TOKEN = os.environ["CHANNEL_ACCESS_TOKEN"]
