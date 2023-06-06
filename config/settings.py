@@ -19,7 +19,7 @@ except ImportError:
 
 PROJECT_DIR = Path().resolve().parent.parent
 
-BASE_PROJECT_URL = "https://calliope-bot.deta.dev"
+BASE_PROJECT_URL = "https://vz88mi.deta.dev"
 
 CHANNEL_SECRET = os.environ["CHANNEL_SECRET"]
 CHANNEL_ACCESS_TOKEN = os.environ["CHANNEL_ACCESS_TOKEN"]
@@ -56,6 +56,7 @@ class PostbackActionData(Enum):
     reminder_post_content = "reminder_post_content"
     reminder_deletion = "reminder_deletion"
     file = "file"
+    file_storage_capacity = "file_storage_capacity"
     file_list = "file_list"
     file_post = "file_post"
     file_deletion = "file_deletion"

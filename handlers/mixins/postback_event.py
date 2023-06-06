@@ -229,6 +229,12 @@ class PostbackEventHandlerMixin(EventHandlerMixinBase):
             items=[
                 QuickReplyButton(
                     action=PostbackAction(
+                        label="容量確認",
+                        data=PostbackActionData.file_storage_capacity.value,
+                    )
+                ),
+                QuickReplyButton(
+                    action=PostbackAction(
                         label="ファイル一覧",
                         data=PostbackActionData.file_list.value,
                     )
@@ -252,6 +258,15 @@ class PostbackEventHandlerMixin(EventHandlerMixinBase):
             TextSendMessage(
                 text="ファイル機能の何を使いますか？",
                 quick_reply=quick_reply,
+            ),
+        )
+
+    async def _handle_file_capacity(self, event: PostbackEvent):
+        user = UserWithKeyModel.parse_obj(DB_LINE_ACCOUNTS.get(self.user_id))
+        await self.line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(
+                text=f"現在のクラウドの容量\n{user.storage_capacity/10**6:.2f}/50 MB",
             ),
         )
 
@@ -471,6 +486,9 @@ https://line.me/R/ti/p/YzZxFFHMI6"""
 
         elif data == PostbackActionData.file.value:
             await self._handle_file(event)
+
+        elif data == PostbackActionData.file_storage_capacity.value:
+            await self._handle_file_capacity(event)
 
         elif data == PostbackActionData.file_list.value:
             await self._handle_file_list(event)

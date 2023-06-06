@@ -57,16 +57,13 @@ class EventsHandler(
             # メッセージイベント
             if isinstance(event, MessageEvent):
                 await self.handle_message_event(event)
-                break
             # ポストバックイベント
             elif isinstance(event, PostbackEvent):
                 await self.handle_postback_event(event)
-                break
             # 友達追加イベント
             elif isinstance(event, FollowEvent):
                 await self.handle_follow_event(event)
-                break
             # 友達解除イベント
             elif isinstance(event, UnfollowEvent):
                 await self.handle_unfollow_event(event)
-                break
+            break
