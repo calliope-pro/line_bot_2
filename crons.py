@@ -5,7 +5,7 @@ import requests
 from config.settings import BASE_PROJECT_URL, JST, app
 
 
-@app.post('/__space/v0/actions')
+@app.post("/__space/v0/actions")
 def notify_reminders():
     try:
         requests.get(f"{BASE_PROJECT_URL}/remind/")
